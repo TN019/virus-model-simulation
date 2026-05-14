@@ -1,0 +1,21 @@
+PERSON = SUSCEPTIBLE,
+
+SUSCEPTIBLE = (
+      infection_succeeds -> INFECTIOUS
+    | reproduce -> SUSCEPTIBLE
+    | old_age_die -> DEAD
+),
+
+INFECTIOUS = (
+      recover_succeeds -> IMMUNE
+    | recover_fails -> DEAD
+    | old_age_die -> DEAD
+    | stay_infectious -> INFECTIOUS
+),
+
+IMMUNE = (
+      immunity_expires -> SUSCEPTIBLE
+    | old_age_die -> DEAD
+),
+
+DEAD = STOP.
