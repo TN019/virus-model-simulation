@@ -55,5 +55,13 @@ virus-project/
     ├── cx_asg_2_2026.pdf
     ├── architecture.md
     ├── domain_mode.png
-    ├── state_matching.png
+    ├── domain_mode.drawio
+    ├── state_machine_baseline.png
+    ├── state_machine_baseline.drawio
+    ├── state_machine_extension.png
+    ├── state_machine_extension.drawio
+    ├── fsp_person_lifecycle_baseline.png
+    ├── fsp_person_lifecycle_baseline.lts
+    ├── fsp_person_lifecycle_extension.png
+    ├── fsp_person_lifecycle_extension.lts
     └── experiments_design.md
