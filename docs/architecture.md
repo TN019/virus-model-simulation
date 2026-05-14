@@ -52,6 +52,7 @@ virus-project/
 │   └── test_simulation_step.py
 │
 └── docs/
+    ├── cx_asg_2_2026.pdf
     ├── architecture.md
     ├── domain_mode.png
     ├── state_matching.png
