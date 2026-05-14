@@ -64,4 +64,4 @@ virus-project/
     ├── fsp_person_lifecycle_baseline.lts
     ├── fsp_person_lifecycle_extension.png
     ├── fsp_person_lifecycle_extension.lts
-    └── experiments_design.md
+    └── experimental_design.md
