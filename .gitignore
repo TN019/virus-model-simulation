@@ -1,43 +1,72 @@
 # macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
 
-# Python caches
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.stackdump
+[Dd]esktop.ini
+
+# Linux
+*~
+
+# Python
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+.Python
 
 # Virtual environments
 .venv/
 venv/
 env/
+ENV/
 
-# Test / lint / type-check caches
+# Test / lint / type-check / coverage
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .coverage
 .coverage.*
 htmlcov/
+.tox/
+.nox/
 
-# Build artifacts
+# Build / packaging
 build/
 dist/
 *.egg-info/
+*.egg
+pip-wheel-metadata/
+*.manifest
+*.spec
 
-# Notebook checkpoints
+# Editors / IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter
 .ipynb_checkpoints/
 
-# Simulation outputs
-outputs/*
-!outputs/.gitkeep
-!outputs/raw/
-!outputs/summaries/
-!outputs/figures/
-!outputs/logs/
-outputs/raw/*
-!outputs/raw/.gitkeep
-outputs/summaries/*
-!outputs/summaries/.gitkeep
-outputs/figures/*
-!outputs/figures/.gitkeep
-outputs/logs/*
-!outputs/logs/.gitkeep
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Matplotlib cache (sometimes created in project dir)
+.mplconfig/
