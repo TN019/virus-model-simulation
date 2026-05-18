@@ -1,168 +1,163 @@
-# Experiment Design
+# Experimental Design
 
 ## 1. Aim
 
-The aim of this experiment design is to test whether our Python implementation can reproduce the main behaviour of the original NetLogo Virus model, and then use an extended version of the model to investigate the effect of imperfect immunity on virus persistence.
+This project has two experiment stages:
 
-The project contains two experiment stages:
+1. **Replication** — run the same parameter settings in NetLogo and Python and compare whether aggregate behaviour matches.
+2. **Extension** — add imperfect immunity (immune reinfection) in Python only and study its effect on virus persistence.
 
-1. Replication experiments, where the same parameter settings are run in both NetLogo and Python.
-2. Extension experiments, where a new variable is added to the Python model to study how imperfect immunity changes the behaviour of the virus.
+Replication is **not** judged by tick-by-tick numerical equality. The Virus model is stochastic; NetLogo and Python may differ in RNG and update details. Success means similar **direction of change**, **trends**, and **summary statistics** under the same conditions.
 
-The goal of replication is not to produce exactly identical output values at every tick. Since the Virus model is stochastic, different runs naturally produce different results. Instead, replication is judged by whether the Python implementation produces similar overall patterns, trends, and summary behaviour under the same model conditions.
+## 2. Replication experiment
 
-## 2. Replication Experiment Aim
+### 2.1 Aim
 
-The aim of the replication experiment is to determine whether the Python implementation can reproduce the major behavioural patterns of the original NetLogo Virus model under the same parameter settings.
+Determine whether the Python implementation reproduces the major behavioural patterns of the NetLogo Virus model under matched parameter settings.
 
-The comparison focuses on aggregate model behaviour rather than exact tick-by-tick output. This is because NetLogo and Python may use different random number generation, update order, and implementation details. Therefore, exact numerical equality is not expected.
+### 2.2 Design
 
-A successful replication should show that the Python model responds to changes in key parameters in the same general way as the NetLogo model.
+- **Conditions:** five shared parameter sets (see §2.3).
+- **Runs per condition:** 100 (configurable in JSON or via `--runs`).
+- **Horizon:** 52 ticks per run (one model year; configurable via `--ticks`).
+- **Platforms:** each condition run in NetLogo (BehaviorSpace) and Python (`scripts/run_baseline.py`).
+- **Randomness:** different seeds per run; comparison uses means and distributions across runs.
 
-## 3. Replication Experiment Design
+### 2.3 Replication parameter sets
 
-The replication experiment will use three to five shared parameter settings. Each setting will be run in both the original NetLogo model and the Python implementation.
+All conditions share: `number_people = 150`, `initial_infected = 10`, `duration = 20`, `world_size = 35` (patches −17…17), `immunity_duration = 52`, `immune_reinfection_probability = 0`. Config files live in `configs/baseline/`.
 
+| Condition | Config file | Infectiousness | Chance recover | Purpose |
+|-----------|-------------|---------------:|---------------:|---------|
+| Baseline | `baseline.json` | 65 | 75 | Default NetLogo-matched behaviour |
+| No infection | `no_infection.json` | 0 | 75 | Transmission shut off |
+| Full infection | `full_infection.json` | 100 | 75 | Maximum transmission |
+| Low spread, high recovery | `low_spread_high_recovery.json` | 20 | 90 | Weak spread, strong recovery |
+| High spread, low recovery | `high_spread_low_recovery.json` | 90 | 20 | Strong spread, weak recovery |
 
-Each condition will be run 30 times in both NetLogo and Python, using different random seeds. Each run will last 1040 ticks, representing 20 years. Repeated runs are necessary because the model contains random movement, random infection, random recovery or death, and random reproduction.
+These five conditions probe transmission strength and recovery rate without changing infection duration or immunity duration, so mechanisms can be compared in isolation.
 
-For each run, the model will record the population state over time. The comparison will then be based on average trends and summary measures across repeated runs.
+### 2.4 Outputs recorded (replication)
 
-## 4. Replication Parameter Sets
+**Per tick** (each run), aligned with NetLogo reporters:
 
-The replication experiment will use the following parameter settings.
+| Output | Meaning |
+|--------|---------|
+| Susceptible (“healthy”) | Not sick and not immune |
+| Infected (“sick”) | Currently infectious |
+| Immune | Temporarily immune |
+| Total | Population size |
+| % infected | Infected / total × 100 |
+| % immune | Immune / total × 100 |
 
-| Condition                 |       Infectiousness |      Chance recover |             Duration | Purpose                  |
-| ------------------------- | -------------------: | ------------------: | -------------------: | ------------------------ |
-| Baseline                  |     [baseline value] |    [baseline value] |     [baseline value] | Normal model behaviour   |
-| Low infectiousness        |  lower than baseline |    same as baseline |     same as baseline | Weaker transmission      |
-| High infectiousness       | higher than baseline |    same as baseline |     same as baseline | Stronger transmission    |
-| Low recovery chance       |     same as baseline | lower than baseline |     same as baseline | More deadly infection    |
-| Longer infection duration |     same as baseline |    same as baseline | higher than baseline | Longer infectious period |
+**Per run** (for comparison tables):
 
+| Measure | Definition |
+|---------|------------|
+| Peak sick | Maximum infected count over the run |
+| Peak week | Tick at which peak sick occurs |
+| Final sick / immune / healthy / total | Values at the last tick |
 
-If only four conditions are used, the longer infection duration condition can be removed. The baseline, low infectiousness, high infectiousness, and low recovery chance conditions are the most important because they test different core mechanisms of the model.
+**Across runs:** mean ± standard deviation of the above per-run measures; used in `results/analysis/compare/*_summary.md`.
 
-## 5. Outputs Recorded for Replication
+### 2.5 Replication comparison method
 
-For each tick, the following outputs will be recorded:
+Comparison does **not** require identical values at every tick.
 
-* susceptible population
-* infected population
-* immune population
-* total population
-* percentage infected
-* percentage immune
+**Visual comparison**
 
-For each complete run, the following summary measures will be calculated:
+- Single-source trends: `results/analysis/netlogo_baseline/*.png`, `results/analysis/python_baseline/*.png` (sick, immune, healthy, total vs week).
+- Overlay: `results/analysis/compare/*_replication_compare.png` — four panels (sick, immune, healthy, total), NetLogo mean vs Python mean.
 
-* peak infected percentage
-* tick of peak infection
-* final infected percentage
-* final immune percentage
-* final population size
-* whether the virus persists at the final tick
-* time to extinction, if the infected population reaches zero
+**Tabular comparison**
 
-Because the model is stochastic, the analysis should also consider the distribution of outcomes across repeated runs, not only the average trend. In particular, the comparison should examine how often the virus persists, how often it dies out, and how much variation exists in peak infection and extinction time under each condition.
+- `results/analysis/compare/*_summary.md` — peak and final metrics with NetLogo mean ± SD, Python mean ± SD, and difference (Python − NetLogo).
 
-These measures allow comparison of both short-term outbreak behaviour and long-term virus survival.
+**Judgement questions**
 
-## 6. Replication Comparison Method
+- Does the baseline condition show a similar outbreak shape?
+- Does zero infectiousness suppress spread in both models?
+- Does higher infectiousness increase infection in both models?
+- Does lower recovery (high spread / low recovery) increase harm vs high recovery?
+- Do summary statistics (peak sick, final immune, final total) point in the same direction?
 
-The NetLogo and Python models will not be compared by checking whether every tick produces the same value. Instead, the comparison will focus on whether both models show similar behavioural patterns under the same conditions.
+Python replication is successful if trends and summary directions agree; large systematic offsets may remain due to implementation differences.
 
-The main comparison questions are:
+### 2.6 Data locations
 
-* Does the baseline condition produce a similar outbreak pattern?
-* Does lower infectiousness reduce the outbreak in both models?
-* Does higher infectiousness increase the outbreak in both models?
-* Does lower recovery chance increase deaths or reduce population size in both models?
-* Does longer infection duration make the virus more persistent in both models?
+| Role | Path |
+|------|------|
+| NetLogo BehaviorSpace CSVs | `results/data/netlogo_baseline/` |
+| Python replication CSVs | `results/data/python_baseline/` |
+| Analysis figures | `results/analysis/` |
 
-The Python implementation will be considered a successful replication if it produces the same direction of change and broadly similar trends across the shared parameter settings. This judgement should be based on both average behaviour and the distribution of repeated-run outcomes.
+Generate analysis after experiments: `uv run python scripts/plot_figures.py` (see `README.md`).
 
-## 7. Extension Aim
+---
 
-The aim of the extension experiment is to investigate how imperfect immunity affects the long-term persistence and outbreak dynamics of the virus.
+## 3. Extension experiment
 
-In the original model, recovered individuals become immune and cannot be infected again until their immunity expires. This means immunity is temporary but fully protective.
+### 3.1 Aim
 
-The extension changes this assumption by allowing immune individuals to be reinfected with a small probability after contact with an infectious individual. This allows the model to test whether less reliable immunity makes the virus more likely to survive in the population over time.
+Investigate how **imperfect immunity** affects long-term virus persistence and outbreak dynamics.
 
-## 8. Extension Research Question
+In the baseline model, recovered individuals become immune and cannot be reinfected until immunity expires. The extension allows immune individuals to become sick again with a small probability when sharing a patch with an infectious individual (`ExtensionInfectionPolicy`).
+
+### 3.2 Research question
 
 Does increasing the probability of reinfection among immune individuals increase the likelihood that the virus persists in the population?
 
-## 9. Extension Design
+### 3.3 Design
 
-The extension introduces a new variable called immune reinfection probability.
+- **New variable:** `immune_reinfection_probability` (same 0–100 scale as `infectiousness` in code).
+- **Baseline behaviour** (`immune_reinfection_probability = 0`) is covered by the replication experiment — not repeated as a separate extension condition.
+- **Planned extension levels:**
 
-This variable controls the probability that an immune individual becomes infected again after contact with an infectious individual.
+| Condition | Reinfection probability | Purpose |
+|-----------|------------------------:|---------|
+| Low imperfect immunity | 2 (≈2% per contact) | Small chance of immune failure |
+| Medium imperfect immunity | 5 (≈5%) | Moderate effect |
+| High imperfect immunity | 10 (≈10%) | Stronger imperfect immunity |
 
-In the baseline model, immune individuals are fully protected until their immunity expires. In the extended model, immune individuals still have protection, but the protection is not perfect. When an immune individual shares a location with an infectious individual, there is a small chance that the immune individual becomes infectious again.
+Config JSON files belong in `configs/extension/` (same shared parameters as baseline except reinfection probability). Run with `scripts/run_extension.py`; output to `results/data/python_extension/`.
 
-This adds a new possible transition from immune to infectious.
+- **Runs / ticks:** same defaults as replication (100 × 52 unless overridden).
+- **NetLogo:** not used — reinfection is new Python-only behaviour.
 
-This reinfection rule should be treated as a distinct infection mechanism for immune individuals, rather than exactly the same rule used for susceptible individuals. If reinfection occurs, the individual transitions directly from immune to infectious before immunity expires.
+Immunity expiry is unchanged: immune individuals may still return to susceptible when `immunity_duration` ends, or become infectious early via reinfection.
 
-The original immunity expiry rule is still retained. Therefore, immune individuals may return to the susceptible state when their immunity duration ends, or they may become infectious earlier if reinfection occurs.
+### 3.4 Expected behaviour
 
-## 10. Extension Parameter Values
+Higher reinfection probability should:
 
-The extension experiment will vary the immune reinfection probability while keeping the other model parameters fixed.
+- Increase opportunities for spread when few susceptibles remain.
+- Raise persistence and/or final infected levels.
+- Possibly affect population size through compounded outbreaks.
 
-The case where immune individuals cannot be reinfected (immune reinfection probability = 0.00) is not treated as a separate extension condition. That behaviour is the default in the baseline model and is already covered by the replication experiment. The extension experiment therefore compares only non-zero reinfection levels.
+Effects may be non-linear (e.g. very high reinfection increasing turnover without monotonic persistence).
 
-| Condition                 | Immune reinfection probability | Purpose                                 |
-| ------------------------- | -----------------------------: | --------------------------------------- |
-| Low imperfect immunity    |                           0.02 | Tests a small chance of reinfection.    |
-| Medium imperfect immunity |                           0.05 | Tests a moderate chance of reinfection. |
-| High imperfect immunity   |                           0.10 | Tests a stronger imperfect immunity effect. |
+### 3.5 Extension outputs
 
-Each extension condition will be run 30 times in the extended Python model, using different random seeds. Each run will last 1040 ticks, representing 20 years. The original NetLogo model is not used for this experiment because immune reinfection is the new behaviour added in our Python extension.
+Same per-tick series as replication. Primary summary interest:
 
-The immune reinfection probability is represented as a value between 0 and 1, where 0.05 means a 5% chance of reinfection after contact with an infectious individual.
+- Persistence at final tick (infected > 0)
+- Peak and final infected percentage
+- Time to extinction (if infected reaches zero)
+- Final population size
+- Distribution of outcomes across runs (not only the mean curve)
 
-Although the parameter is represented on a 0 to 1 scale, the experiment only tests values up to 0.10 because reinfection is evaluated at each infectious contact. A value of 0.10 already represents a relatively strong chance of immune failure per contact, while still preserving the idea that immunity provides partial protection.
+Extension-specific analysis plots can mirror the baseline pipeline once `configs/extension/` and `results/data/python_extension/` are populated.
 
-## 11. Expected Extension Behaviour
+### 3.6 Hypothesis
 
-The expected behaviour is that higher immune reinfection probability will make the virus more likely to persist in the population.
+Increasing immune reinfection probability **increases virus persistence** and delays or prevents extinction, because immune individuals are no longer fully removed from the infectious chain.
 
-In the original model, immune individuals are temporarily removed from the pool of possible hosts. This can make it harder for the virus to survive after the initial outbreak, especially if many people become immune at the same time.
+---
 
-In the extended model, immune individuals are no longer completely protected. This means the virus may still have access to potential hosts even when the susceptible population is low. As a result, the virus may survive for longer, have a higher final infected percentage, or show a higher persistence rate.
+## 4. Implementation notes
 
-However, the effect may not be purely linear. If reinfection becomes too common, the model may also show larger outbreaks, increased deaths, or changes in population size. Therefore, the extension experiment will consider both virus persistence and population-level effects.
+- **Terminology:** NetLogo “sick” = Python `infected`; “healthy” (not sick, not immune) = `susceptible`.
+- **Export format:** Python writes BehaviorSpace Spreadsheet v2 CSV for direct comparison with NetLogo exports.
+- **Quick tests:** `--runs 2 --ticks 10` for fast smoke runs; full replication uses 100 × 52.
 
-## 12. Extension Outputs
-
-The extension experiment will record the same basic outputs as the replication experiment:
-
-* susceptible population
-* infected population
-* immune population
-* total population
-* percentage infected
-* percentage immune
-
-The main summary measures for the extension are:
-
-* persistence rate at the final tick
-* final infected percentage
-* peak infected percentage
-* time to extinction
-* final population size
-
-Because the extension is also stochastic, the results should also compare the distribution of outcomes across runs. This includes how often persistence occurs, how often extinction occurs, and how much variation exists in peak infection and extinction time at different reinfection levels.
-
-These outputs are used to determine whether imperfect immunity mainly affects the initial outbreak, long-term virus survival, or the overall population dynamics.
-
-## 13. Extension Hypothesis
-
-The hypothesis is that increasing immune reinfection probability will increase virus persistence.
-
-If immune reinfection probability is higher, immune individuals can sometimes become infectious again before their immunity expires. This gives the virus more opportunities to continue spreading, especially after the initial susceptible population has decreased.
-
-Therefore, the extended model is expected to show higher persistence rates and longer time to extinction as immune reinfection probability increases.
+See `docs/architecture.md` for module layout and `README.md` for commands to reproduce final results.

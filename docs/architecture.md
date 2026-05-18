@@ -1,56 +1,42 @@
-virus-project/
+# Architecture
+
+Python replication of the NetLogo Virus model for SWEN90004 Assignment 2. The codebase separates the agent-based model, experiment execution, and post-run analysis.
+
+## Repository layout
+
+```
+virus-model-simulation/
 ├── README.md
-├── pyproject.toml          
-├── uv.lock                 
+├── pyproject.toml
+├── uv.lock
 ├── .python-version
 ├── .gitignore
 │
 ├── configs/
-│   ├── baseline.json
-│   ├── infectiousness_low.json
-│   ├── infectiousness_high.json
-│   ├── recovery_low.json
-│   ├── extension_immunity_02.json
-│   ├── extension_immunity_05.json
-│   └── extension_immunity_10.json
+│   ├── baseline/              # 5 replication conditions (JSON)
+│   └── extension/             # extension conditions (JSON, when added)
 │
 ├── src/
-│   └── virus_model/
-│       ├── config.py
-│       ├── state.py
-│       ├── person.py
-│       ├── world.py
-│       ├── policies.py
-│       ├── simulation.py
-│       ├── stats.py
-│       └── experiment_runner.py
+│   ├── virus_model/           # core simulation
+│   ├── run/                   # experiment runners + BehaviorSpace export
+│   └── analysis/              # CSV parsing, plots, summary tables
 │
 ├── scripts/
-│   ├── run_baseline.py
-│   ├── run_experiments.py
-│   ├── run_extension.py
-│   └── generate_plots.py
+│   ├── run_baseline.py        # run.baseline.main()
+│   ├── run_extension.py       # run.extension.main()
+│   └── plot_figures.py        # analysis.cli.main()
 │
-├── analysis/
-│   ├── analyse_baseline.py
-│   ├── compare_conditions.py
-│   ├── compare_netlogo_python.py
-│   └── plot_results.py
-│
-├── outputs/
-│   ├── raw/
-│   ├── summaries/
-│   ├── figures/
-│   └── logs/
+├── results/
+│   ├── data/
+│   │   ├── netlogo_baseline/  # NetLogo BehaviorSpace CSVs (reference)
+│   │   ├── python_baseline/   # Python replication CSVs
+│   │   └── python_extension/  # Python extension CSVs
+│   └── analysis/
+│       ├── netlogo_baseline/  # per-condition trend plots (NetLogo)
+│       ├── python_baseline/   # per-condition trend plots (Python)
+│       └── compare/           # 4-panel overlays + summary markdown
 │
 ├── tests/
-│   ├── test_person_state.py
-│   ├── test_world.py
-│   ├── test_infection.py
-│   ├── test_recovery_death.py
-│   ├── test_reproduction.py
-│   └── test_simulation_step.py
-│
 └── docs/
     ├── cx_asg_2_2026.pdf
     ├── architecture.md
