@@ -47,7 +47,7 @@ def main(argv: list[str] | None = None) -> None:
         figures, summaries = plot_all_replication(
             args.python_baseline_dir,
             args.netlogo_baseline_dir,
-            args.analysis_dir / "compare",
+            args.analysis_dir / "replication_experiment",
         )
         written.extend(figures)
         written.extend(summaries)

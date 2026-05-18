@@ -34,7 +34,7 @@ virus-model-simulation/
 │   └── analysis/
 │       ├── netlogo_baseline/  # per-condition trend plots (NetLogo)
 │       ├── python_baseline/   # per-condition trend plots (Python)
-│       └── compare/           # 4-panel overlays + summary markdown
+│       └── replication_experiment/  # 4-panel overlays + summary markdown
 │
 ├── tests/
 └── docs/

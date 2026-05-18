@@ -63,8 +63,8 @@ uv run python scripts/plot_figures.py
 | NetLogo reference CSVs | `results/data/netlogo_baseline/` |
 | NetLogo trend plots | `results/analysis/netlogo_baseline/*.png` |
 | Python trend plots | `results/analysis/python_baseline/*.png` |
-| Python vs NetLogo (4 panels) | `results/analysis/compare/*_replication_compare.png` |
-| Summary tables | `results/analysis/compare/*_summary.md` |
+| Python vs NetLogo (4 panels) | `results/analysis/replication_experiment/*_replication_compare.png` |
+| Summary tables | `results/analysis/replication_experiment/*_summary.md` |
 
 Plot only one part if needed:
 

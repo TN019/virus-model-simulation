@@ -58,7 +58,7 @@ These five conditions probe transmission strength and recovery rate without chan
 | Peak week | Tick at which peak sick occurs |
 | Final sick / immune / healthy / total | Values at the last tick |
 
-**Across runs:** mean ± standard deviation of the above per-run measures; used in `results/analysis/compare/*_summary.md`.
+**Across runs:** mean ± standard deviation of the above per-run measures; used in `results/analysis/replication_experiment/*_summary.md`.
 
 ### 2.5 Replication comparison method
 
@@ -67,11 +67,11 @@ Comparison does **not** require identical values at every tick.
 **Visual comparison**
 
 - Single-source trends: `results/analysis/netlogo_baseline/*.png`, `results/analysis/python_baseline/*.png` (sick, immune, healthy, total vs week).
-- Overlay: `results/analysis/compare/*_replication_compare.png` — four panels (sick, immune, healthy, total), NetLogo mean vs Python mean.
+- Overlay: `results/analysis/replication_experiment/*_replication_compare.png` — four panels (sick, immune, healthy, total), NetLogo mean vs Python mean.
 
 **Tabular comparison**
 
-- `results/analysis/compare/*_summary.md` — peak and final metrics with NetLogo mean ± SD, Python mean ± SD, and difference (Python − NetLogo).
+- `results/analysis/replication_experiment/*_summary.md` — peak and final metrics with NetLogo mean ± SD, Python mean ± SD, and difference (Python − NetLogo).
 
 **Judgement questions**
 
