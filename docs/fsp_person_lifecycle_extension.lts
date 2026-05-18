@@ -15,7 +15,7 @@ INFECTIOUS = (
 
 IMMUNE = (
       immunity_expires -> SUSCEPTIBLE
-    | imperfect_immunity_infection_succeeds -> INFECTIOUS
+    | immune_reinfection_succeeds -> INFECTIOUS
     | reproduce -> IMMUNE
     | old_age_die -> DEAD
 ),

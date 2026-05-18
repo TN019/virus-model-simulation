@@ -54,8 +54,8 @@ virus-project/
 └── docs/
     ├── cx_asg_2_2026.pdf
     ├── architecture.md
-    ├── domain_mode.png
-    ├── domain_mode.drawio
+    ├── domain_model.png
+    ├── domain_model.drawio
     ├── state_machine_baseline.png
     ├── state_machine_baseline.drawio
     ├── state_machine_extension.png

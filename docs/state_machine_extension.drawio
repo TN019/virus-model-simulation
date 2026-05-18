@@ -11,7 +11,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="zuPVIM6aQIscLuEDNB7c-11" connectable="0" parent="zuPVIM6aQIscLuEDNB7c-7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=light-dark(#FFFFFF,#FFFFFF);fontColor=light-dark(#000000,#000000);" value="brith" vertex="1">
+        <mxCell id="zuPVIM6aQIscLuEDNB7c-11" connectable="0" parent="zuPVIM6aQIscLuEDNB7c-7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=light-dark(#FFFFFF,#FFFFFF);fontColor=light-dark(#000000,#000000);" value="birth" vertex="1">
           <mxGeometry relative="1" x="-0.0167" y="-1" as="geometry">
             <mxPoint x="-1" y="6" as="offset" />
           </mxGeometry>

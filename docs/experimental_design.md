@@ -112,12 +112,13 @@ The original immunity expiry rule is still retained. Therefore, immune individua
 
 The extension experiment will vary the immune reinfection probability while keeping the other model parameters fixed.
 
-| Condition                 | Immune reinfection probability | Purpose                                                                           |
-| ------------------------- | -----------------------------: | --------------------------------------------------------------------------------- |
-| Secure immunity           |                           0.00 | Represents the original assumption where immune individuals cannot be reinfected. |
-| Low imperfect immunity    |                           0.02 | Tests a small chance of reinfection.                                              |
-| Medium imperfect immunity |                           0.05 | Tests a moderate chance of reinfection.                                           |
-| High imperfect immunity   |                           0.10 | Tests a stronger imperfect immunity effect.                                       |
+The case where immune individuals cannot be reinfected (immune reinfection probability = 0.00) is not treated as a separate extension condition. That behaviour is the default in the baseline model and is already covered by the replication experiment. The extension experiment therefore compares only non-zero reinfection levels.
+
+| Condition                 | Immune reinfection probability | Purpose                                 |
+| ------------------------- | -----------------------------: | --------------------------------------- |
+| Low imperfect immunity    |                           0.02 | Tests a small chance of reinfection.    |
+| Medium imperfect immunity |                           0.05 | Tests a moderate chance of reinfection. |
+| High imperfect immunity   |                           0.10 | Tests a stronger imperfect immunity effect. |
 
 Each extension condition will be run 30 times in the extended Python model, using different random seeds. Each run will last 1040 ticks, representing 20 years. The original NetLogo model is not used for this experiment because immune reinfection is the new behaviour added in our Python extension.
 
