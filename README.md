@@ -12,16 +12,16 @@ Commands below work the same on macOS, Linux, and Windows (PowerShell or Command
 ## 1. Install dependencies
 
 ```bash
-uv sync --extra dev --extra analysis
+uv sync --extra analysis
 ```
 
 ## 2. Add NetLogo reference data (for comparison)
 
 Export BehaviorSpace spreadsheets from NetLogo and place them in:
 
-`results/data/netlogo_baseline/`
+`results/data/netlogo_prototype/`
 
-Expected filenames (one per baseline condition), for example:
+Expected filenames (one per prototype condition), for example:
 
 - `Virus Baseline_100_runs-spreadsheet.csv`
 - `Virus No_infection_100_runs-spreadsheet.csv`
@@ -31,55 +31,51 @@ Expected filenames (one per baseline condition), for example:
 
 Skip this step if you only need Python-only plots (`--mode python`).
 
-## 3. Run Python baseline experiments
+## 3. Run Python prototype experiments
 
-Default: **100 runs × 52 ticks** per condition in `configs/baseline/`.
+Default: **100 runs × 52 ticks** per condition in `src/configs/prototype/`.
 
 ```bash
-uv run python scripts/run_baseline.py
+uv run python -m run.run_prototype
 ```
 
 CSV output:
 
-`results/data/python_baseline/`
-
-Quick test (much faster):
-
-```bash
-uv run python scripts/run_baseline.py --runs 2 --ticks 10
-```
+`results/data/python_prototype/`
 
 ## 4. Generate figures and comparison tables
 
 ```bash
-uv run python scripts/plot_figures.py
+uv run python -m run.plot_figures
 ```
 
 ## Final outputs
 
 | Output | Location |
 |--------|----------|
-| Python experiment CSVs | `results/data/python_baseline/` |
-| NetLogo reference CSVs | `results/data/netlogo_baseline/` |
-| NetLogo trend plots | `results/analysis/netlogo_baseline/*.png` |
-| Python trend plots | `results/analysis/python_baseline/*.png` |
-| Python vs NetLogo (4 panels) | `results/analysis/replication_experiment/*_replication_compare.png` |
-| Summary tables | `results/analysis/replication_experiment/*_summary.md` |
+| Python experiment CSVs | `results/data/python_prototype/` |
+| NetLogo reference CSVs | `results/data/netlogo_prototype/` |
+| NetLogo trend plots | `results/analysis/replication/netlogo/*.png` |
+| Python trend plots | `results/analysis/replication/python/*.png` |
+| Python vs NetLogo (4 panels) | `results/analysis/replication/comparison/*_replication_compare.png` |
+| Summary tables | `results/analysis/replication/comparison/*_summary.md` |
+| Extension per-level trends | `results/analysis/extension/{00,01,02,05,10,25}/trends.png` |
+| Extension aggregate figures | `results/analysis/extension/extension/` |
 
 Plot only one part if needed:
 
 ```bash
-uv run python scripts/plot_figures.py --mode netlogo
-uv run python scripts/plot_figures.py --mode python
-uv run python scripts/plot_figures.py --mode compare
+uv run python -m run.plot_figures --mode netlogo
+uv run python -m run.plot_figures --mode python
+uv run python -m run.plot_figures --mode compare
 ```
 
 ## End-to-end (copy-paste)
 
 ```bash
-uv sync --extra dev --extra analysis
-uv run python scripts/run_baseline.py
-uv run python scripts/plot_figures.py
+uv sync --extra analysis
+uv run python -m run.run_prototype
+uv run python -m run.plot_figures
 ```
 
 After step 2 (NetLogo CSVs in place), step 4 also produces comparison plots and markdown summaries.

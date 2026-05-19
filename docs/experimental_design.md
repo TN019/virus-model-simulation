@@ -9,6 +9,8 @@ This project has two experiment stages:
 
 Replication is **not** judged by tick-by-tick numerical equality. The Virus model is stochastic; NetLogo and Python may differ in RNG and update details. Success means similar **direction of change**, **trends**, and **summary statistics** under the same conditions.
 
+---
+
 ## 2. Replication experiment
 
 ### 2.1 Aim
@@ -18,14 +20,16 @@ Determine whether the Python implementation reproduces the major behavioural pat
 ### 2.2 Design
 
 - **Conditions:** five shared parameter sets (see §2.3).
-- **Runs per condition:** 100 (configurable in JSON or via `--runs`).
-- **Horizon:** 52 ticks per run (one model year; configurable via `--ticks`).
-- **Platforms:** each condition run in NetLogo (BehaviorSpace) and Python (`scripts/run_baseline.py`).
-- **Randomness:** different seeds per run; comparison uses means and distributions across runs.
+- **Runs per condition:** 100 (overridable in JSON or via `--runs`).
+- **Horizon:** 52 ticks per run (one model year; overridable via `--ticks`).
+- **Platforms:** each condition in NetLogo (BehaviorSpace) and Python (`uv run python -m run.run_prototype`).
+- **Randomness:** `seed = base_seed + run_id` (default `base_seed: 0`); comparison uses means and distributions across runs.
 
 ### 2.3 Replication parameter sets
 
-All conditions share: `number_people = 150`, `initial_infected = 10`, `duration = 20`, `world_size = 35` (patches −17…17), `immunity_duration = 52`, `immune_reinfection_probability = 0`. Config files live in `configs/baseline/`.
+Shared parameters: `number_people = 150`, `initial_infected = 10`, `duration = 20`, `world_size = 35` (patches −17…17), `immunity_duration = 52`, `immune_reinfection_probability = 0`.
+
+Config files: `src/configs/prototype/`
 
 | Condition | Config file | Infectiousness | Chance recover | Purpose |
 |-----------|-------------|---------------:|---------------:|---------|
@@ -35,7 +39,7 @@ All conditions share: `number_people = 150`, `initial_infected = 10`, `duration 
 | Low spread, high recovery | `low_spread_high_recovery.json` | 20 | 90 | Weak spread, strong recovery |
 | High spread, low recovery | `high_spread_low_recovery.json` | 90 | 20 | Strong spread, weak recovery |
 
-These five conditions probe transmission strength and recovery rate without changing infection duration or immunity duration, so mechanisms can be compared in isolation.
+These five conditions vary transmission and recovery only (fixed duration and immunity), so effects can be compared in isolation.
 
 ### 2.4 Outputs recorded (replication)
 
@@ -58,40 +62,44 @@ These five conditions probe transmission strength and recovery rate without chan
 | Peak week | Tick at which peak sick occurs |
 | Final sick / immune / healthy / total | Values at the last tick |
 
-**Across runs:** mean ± standard deviation of the above per-run measures; used in `results/analysis/replication_experiment/*_summary.md`.
+**Across runs:** mean ± standard deviation; written to `results/analysis/replication/comparison/*_summary.md`.
 
 ### 2.5 Replication comparison method
 
 Comparison does **not** require identical values at every tick.
 
-**Visual comparison**
+**Visual**
 
-- Single-source trends: `results/analysis/netlogo_baseline/*.png`, `results/analysis/python_baseline/*.png` (sick, immune, healthy, total vs week).
-- Overlay: `results/analysis/replication_experiment/*_replication_compare.png` — four panels (sick, immune, healthy, total), NetLogo mean vs Python mean.
+- Single-source trends: `results/analysis/replication/netlogo/*.png`, `results/analysis/replication/python/*.png`.
+- Overlay: `results/analysis/replication/comparison/*_replication_compare.png` — four panels (sick, immune, healthy, total), NetLogo mean vs Python mean.
 
-**Tabular comparison**
+**Tabular**
 
-- `results/analysis/replication_experiment/*_summary.md` — peak and final metrics with NetLogo mean ± SD, Python mean ± SD, and difference (Python − NetLogo).
+- `results/analysis/replication/comparison/*_summary.md` — peak and final metrics, NetLogo mean ± SD, Python mean ± SD, difference (Python − NetLogo).
 
 **Judgement questions**
 
-- Does the baseline condition show a similar outbreak shape?
+- Does the **baseline** condition show a similar outbreak shape?
 - Does zero infectiousness suppress spread in both models?
 - Does higher infectiousness increase infection in both models?
 - Does lower recovery (high spread / low recovery) increase harm vs high recovery?
 - Do summary statistics (peak sick, final immune, final total) point in the same direction?
 
-Python replication is successful if trends and summary directions agree; large systematic offsets may remain due to implementation differences.
-
-### 2.6 Data locations
+### 2.6 Data and commands (replication)
 
 | Role | Path |
 |------|------|
-| NetLogo BehaviorSpace CSVs | `results/data/netlogo_baseline/` |
-| Python replication CSVs | `results/data/python_baseline/` |
-| Analysis figures | `results/analysis/` |
+| NetLogo BehaviorSpace CSVs | `results/data/netlogo_prototype/` |
+| Python replication CSVs | `results/data/python_prototype/` |
+| Analysis output | `results/analysis/replication/` |
 
-Generate analysis after experiments: `uv run python scripts/plot_figures.py` (see `README.md`).
+```bash
+uv run python -m run.run_prototype          # generate Python CSVs
+uv run python -m run.plot_figures            # all modes: netlogo, python, compare
+uv run python -m run.plot_figures --mode compare
+```
+
+NetLogo export filenames must match config `output_file` values (e.g. `Virus Baseline_100_runs-spreadsheet.csv`).
 
 ---
 
@@ -99,65 +107,92 @@ Generate analysis after experiments: `uv run python scripts/plot_figures.py` (se
 
 ### 3.1 Aim
 
-Investigate how **imperfect immunity** affects long-term virus persistence and outbreak dynamics.
+Investigate how **imperfect immunity**, implemented as immune reinfection, affects reinfection events and population infection levels over time.
 
-In the baseline model, recovered individuals become immune and cannot be reinfected until immunity expires. The extension allows immune individuals to become sick again with a small probability when sharing a patch with an infectious individual (`ExtensionInfectionPolicy`).
+With `immune_reinfection_probability = 0`, recovered individuals become immune and cannot be reinfected until immunity expires (`PrototypeInfectionPolicy`). The extension allows immune individuals to become sick again with a configured probability when sharing a patch with an infectious carrier (`ExtensionInfectionPolicy`).
 
 ### 3.2 Research question
 
-Does increasing the probability of reinfection among immune individuals increase the likelihood that the virus persists in the population?
+To what extent does imperfect immunity, implemented as immune reinfection, increase reinfection events and shift the population toward higher infection levels over time?
 
 ### 3.3 Design
 
-- **New variable:** `immune_reinfection_probability` (same 0–100 scale as `infectiousness` in code).
-- **Baseline behaviour** (`immune_reinfection_probability = 0`) is covered by the replication experiment — not repeated as a separate extension condition.
-- **Planned extension levels:**
+- **New variable:** `immune_reinfection_probability` (0–100 scale, same convention as `infectiousness`).
+- **Shared parameters:** same as replication except reinfection probability (see JSON in `src/configs/extension/`).
+- **Six levels** (0–10% primary sweep; 25% optional stress-test):
 
-| Condition | Reinfection probability | Purpose |
-|-----------|------------------------:|---------|
-| Low imperfect immunity | 2 (≈2% per contact) | Small chance of immune failure |
-| Medium imperfect immunity | 5 (≈5%) | Moderate effect |
-| High imperfect immunity | 10 (≈10%) | Stronger imperfect immunity |
+| Config | `name` | Reinfection % | Purpose |
+|--------|--------|-------------:|---------|
+| `00.json` | `00` | 0 | Extension control (no immune reinfection) |
+| `01.json` | `01` | 1 | Very low |
+| `02.json` | `02` | 2 | Low |
+| `05.json` | `05` | 5 | Medium |
+| `10.json` | `10` | 10 | High |
+| `25.json` | `25` | 25 | Additional stress-test (beyond primary sweep) |
 
-Config JSON files belong in `configs/extension/` (same shared parameters as baseline except reinfection probability). Run with `scripts/run_extension.py`; output to `results/data/python_extension/`.
+- **Runs / ticks:** default 100 × 52 (overridable).
+- **Platform:** Python only (reinfection is not in NetLogo).
+- **Seeds:** `base_seed + run_id`, same as replication.
 
-- **Runs / ticks:** same defaults as replication (100 × 52 unless overridden).
-- **NetLogo:** not used — reinfection is new Python-only behaviour.
-
-Immunity expiry is unchanged: immune individuals may still return to susceptible when `immunity_duration` ends, or become infectious early via reinfection.
+Immunity expiry is unchanged: immune agents may return to susceptible after `immunity_duration`, or become infectious early via reinfection.
 
 ### 3.4 Expected behaviour
 
 Higher reinfection probability should:
 
-- Increase opportunities for spread when few susceptibles remain.
-- Raise persistence and/or final infected levels.
-- Possibly affect population size through compounded outbreaks.
+- Increase **immune reinfection events** (counted per run in metrics JSON).
+- Shift tick series toward **higher infected counts** (peak and trajectory).
+- Increase spread opportunities when few susceptibles remain; persistence may rise as a consequence.
 
 Effects may be non-linear (e.g. very high reinfection increasing turnover without monotonic persistence).
 
 ### 3.5 Extension outputs
 
-Same per-tick series as replication. Primary summary interest:
+**Per run (CSV):** same tick series as replication (BehaviorSpace Spreadsheet v2).
 
-- Persistence at final tick (infected > 0)
-- Peak and final infected percentage
-- Time to extinction (if infected reaches zero)
-- Final population size
-- Distribution of outcomes across runs (not only the mean curve)
+**Per condition (sidecar JSON):** `{name}_run_metrics.json` in the data directory, including:
 
-Extension-specific analysis plots can mirror the baseline pipeline once `configs/extension/` and `results/data/python_extension/` are populated.
+- `immune_reinfections_per_run`
+- `cumulative_reinfections_by_run`
+
+**Data locations**
+
+| Role | Path |
+|------|------|
+| Extension CSVs + metrics | `results/data/python_extension/` |
+| Long horizon (optional) | `results/data/python_extension_{N}ticks/` (e.g. 156, 260) |
+
+**Analysis output** (`uv run python -m run.plot_extension`):
+
+| Output | Path |
+|--------|------|
+| Per-level trend + cumulative reinfections | `results/analysis/extension/{00,01,02,05,10,25}/trends.png` |
+| Multi-level comparison (4 panels) | `results/analysis/extension/extension/reinfection_levels_compare.png` |
+| Panels by metric | `results/analysis/extension/extension/{sick,immune,healthy,total}_by_reinfection.png` |
+| Survival curve | `results/analysis/extension/extension/infection_survival_curve.png` |
+| Total reinfections vs probability | `results/analysis/extension/extension/total_reinfections_by_probability.png` |
+| Persistence table | `results/analysis/extension/extension/persistence.md` |
+| Secondary metrics | `results/analysis/extension/extension/secondary_metrics.md` |
+
+For `--ticks 156` or `260`, analysis writes under `results/analysis/extension_{N}ticks/` with the same internal layout (`00/` … `25/`, `extension/`).
+
+```bash
+uv run python -m run.run_extension
+uv run python -m run.run_extension --ticks 156 --output-dir results/data/python_extension_156ticks
+uv run python -m run.plot_extension --ticks 156
+```
 
 ### 3.6 Hypothesis
 
-Increasing immune reinfection probability **increases virus persistence** and delays or prevents extinction, because immune individuals are no longer fully removed from the infectious chain.
+Increasing immune reinfection probability **increases reinfection events** and **shifts the population toward higher infection levels over time**; at high levels this may also raise persistence, because immune individuals are no longer fully removed from the infectious chain.
 
 ---
 
 ## 4. Implementation notes
 
 - **Terminology:** NetLogo “sick” = Python `infected`; “healthy” (not sick, not immune) = `susceptible`.
-- **Export format:** Python writes BehaviorSpace Spreadsheet v2 CSV for direct comparison with NetLogo exports.
-- **Quick tests:** `--runs 2 --ticks 10` for fast smoke runs; full replication uses 100 × 52.
+- **Export format:** BehaviorSpace Spreadsheet v2 CSV for direct comparison with NetLogo.
+- **Replication scale:** 100 runs × 52 ticks per condition (`--runs` / `--ticks` on CLI).
+- **Extension CSV names:** `Virus Extension {level}_100_runs-spreadsheet.csv` (e.g. `Virus Extension 10_100_runs-spreadsheet.csv`).
 
-See `docs/architecture.md` for module layout and `README.md` for commands to reproduce final results.
+See `docs/architecture.md` for module layout and `README.md` for setup and end-to-end commands.

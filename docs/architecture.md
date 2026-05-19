@@ -1,6 +1,49 @@
 # Architecture
 
-Python replication of the NetLogo Virus model for SWEN90004 Assignment 2. The codebase separates the agent-based model, experiment execution, and post-run analysis.
+```
+src/
+├── model/              # Core ABM: Person, World, VirusSimulation, infection policies
+├── configs/
+│   ├── prototype/      # Five replication conditions (JSON)
+│   └── extension/      # Six reinfection levels: 00, 01, 02, 05, 10, 25 (JSON)
+├── scripts/            # Experiment execution (no plotting)
+│   ├── common/         # Condition loading, BehaviorSpace CSV export, console output
+│   ├── prototype/      # Replication experiment runner
+│   └── extension/      # Extension runner (+ per-run metrics JSON)
+├── run/                # Thin CLI entry points (delegate to scripts/ or analysis/)
+└── analysis/           # Read CSVs / metrics; write figures and markdown tables
+    ├── common/         # Spreadsheet parsing, shared plot helpers, output path helpers
+    ├── replication/    # NetLogo vs Python replication plots and summaries
+    └── extension/      # Extension trends, comparisons, persistence tables
+```
+
+### `model/`
+
+- **`VirusSimulation`** — tick loop: movement, infection, recovery, immunity expiry, reproduction, statistics.
+- **`PrototypeInfectionPolicy`** — NetLogo-aligned transmission (susceptible only).
+- **`ExtensionInfectionPolicy`** — adds immune reinfection when `immune_reinfection_probability > 0`.
+- Policy is chosen automatically from config (`ExtensionInfectionPolicy` if probability > 0, else `PrototypeInfectionPolicy`).
+
+### `scripts/`
+
+Loads JSON from `src/configs/`, runs stochastic replicates, writes **BehaviorSpace Spreadsheet v2** CSVs under `results/data/`. Extension runs also write `{condition}_run_metrics.json` (reinfection counts and cumulative series per run).
+
+Uses **stdlib only** (no matplotlib).
+
+### `analysis/`
+
+Reads experiment output and writes PNG figures and markdown summaries under `results/analysis/`. Requires the optional `analysis` dependency (`matplotlib`).
+
+### `run/`
+
+Entry modules invoked as `python -m run.<module>` (typically via `uv run`):
+
+| Module | Delegates to | Output |
+|--------|----------------|--------|
+| `run_prototype` | `scripts.prototype` | Replication CSVs |
+| `run_extension` | `scripts.extension` | Extension CSVs + metrics JSON |
+| `plot_figures` | `analysis.replication` | Replication figures |
+| `plot_extension` | `analysis.extension` | Extension figures |
 
 ## Repository layout
 
@@ -10,44 +53,30 @@ virus-model-simulation/
 ├── pyproject.toml
 ├── uv.lock
 ├── .python-version
-├── .gitignore
 │
-├── configs/
-│   ├── baseline/              # 5 replication conditions (JSON)
-│   └── extension/             # extension conditions (JSON, when added)
-│
-├── src/
-│   ├── virus_model/           # core simulation
-│   ├── run/                   # experiment runners + BehaviorSpace export
-│   └── analysis/              # CSV parsing, plots, summary tables
-│
-├── scripts/
-│   ├── run_baseline.py        # run.baseline.main()
-│   ├── run_extension.py       # run.extension.main()
-│   └── plot_figures.py        # analysis.cli.main()
+├── src/                    # (see code layers above)
 │
 ├── results/
-│   ├── data/
-│   │   ├── netlogo_baseline/  # NetLogo BehaviorSpace CSVs (reference)
-│   │   ├── python_baseline/   # Python replication CSVs
-│   │   └── python_extension/  # Python extension CSVs
-│   └── analysis/
-│       ├── netlogo_baseline/  # per-condition trend plots (NetLogo)
-│       ├── python_baseline/   # per-condition trend plots (Python)
-│       └── replication_experiment/  # 4-panel overlays + summary markdown
+│   ├── data/               # Raw experiment output (CSV + extension metrics)
+│   │   ├── netlogo_prototype/
+│   │   ├── python_prototype/
+│   │   ├── python_extension/
+│   │   └── python_extension_{N}ticks/   # optional long horizons (e.g. 156, 260)
+│   └── analysis/           # Generated figures and tables
+│       ├── replication/
+│       │   ├── netlogo/        # Per-condition trends (NetLogo)
+│       │   ├── python/         # Per-condition trends (Python)
+│       │   └── comparison/     # 4-panel overlays + *_summary.md
+│       └── extension/
+│           ├── 00/ … 25/       # Per-level trends (trends.png)
+│           └── extension/      # Cross-level figures and *.md tables
 │
-├── tests/
 └── docs/
-    ├── cx_asg_2_2026.pdf
     ├── architecture.md
-    ├── domain_model.png
-    ├── domain_model.drawio
-    ├── state_machine_baseline.png
-    ├── state_machine_baseline.drawio
-    ├── state_machine_extension.png
-    ├── state_machine_extension.drawio
-    ├── fsp_person_lifecycle_baseline.png
-    ├── fsp_person_lifecycle_baseline.lts
-    ├── fsp_person_lifecycle_extension.png
-    ├── fsp_person_lifecycle_extension.lts
-    └── experimental_design.md
+    ├── experimental_design.md
+    ├── domain_model.png / .drawio
+    ├── state_machine_baseline.png / .drawio
+    ├── state_machine_extension.png / .drawio
+    ├── fsp_person_lifecycle_baseline.png / .lts
+    └── fsp_person_lifecycle_extension.png / .lts
+```

@@ -1,0 +1,18 @@
+{
+  "name": "10",
+  "output_file": "Virus Extension 10_100_runs-spreadsheet.csv",
+  "number_people": 150,
+  "initial_infected": 10,
+  "infectiousness": 65,
+  "duration": 20,
+  "chance_recover": 75,
+  "ticks": 52,
+  "runs": 100,
+  "world_size": 35,
+  "lifespan": 2600,
+  "carrying_capacity": 300,
+  "immunity_duration": 52,
+  "chance_reproduce": 1,
+  "immune_reinfection_probability": 10,
+  "base_seed": 0
+}
