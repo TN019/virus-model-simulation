@@ -107,7 +107,14 @@ uv run python -m run.run_extension --ticks 260 --output-dir results/data/python_
 uv run python -m run.plot_extension
 ```
 
-Use `--ticks 156` (or `260`) if you ran long-horizon data into `python_extension_{N}ticks/`.
+Long-horizon data (read from `results/data/python_extension_{N}ticks/`, write figures under `results/analysis/extension_{N}ticks/`):
+
+```bash
+uv run python -m run.plot_extension --ticks 156
+uv run python -m run.plot_extension --ticks 260
+```
+
+`plot_extension` uses `--data-dir` and `--analysis-dir` (not `--output-dir`; that flag is only on `run_extension`).
 
 Partial modes: `trends`, `compare`, `survival`, `summary`, or `all` (default).
 
