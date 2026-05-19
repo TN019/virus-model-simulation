@@ -161,6 +161,8 @@ uv run python -m run.plot_extension
 
 ## Data layout (summary)
 
+See [`results/README.md`](results/README.md) for what each folder and file type means.
+
 | Role | Path |
 |------|------|
 | NetLogo replication CSVs | `results/data/netlogo_prototype/` |
