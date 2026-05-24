@@ -150,7 +150,7 @@ Effects may be non-linear (e.g. very high reinfection increasing turnover withou
 
 **Per run (CSV):** same tick series as replication (BehaviorSpace Spreadsheet v2).
 
-**Per condition (sidecar JSON):** `{name}_run_metrics.json` in the data directory, including:
+**Per condition (sidecar CSV):** `{name}_run_metrics.csv` in the data directory, including:
 
 - `immune_reinfections_per_run`
 - `cumulative_reinfections_by_run`

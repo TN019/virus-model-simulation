@@ -1,6 +1,6 @@
 # Output 目录说明
 
-本目录存放实验的**原始数据**（CSV 与 extension 指标 JSON）。除 NetLogo 导出的 CSV 需手动放入外，其余均可通过 `uv run python -m run.*` 重新生成。
+本目录存放实验的**原始数据**（全部为 CSV）。除 NetLogo 导出的 CSV 需手动放入外，其余均可通过 `uv run python -m run.*` 重新生成。
 
 ---
 
@@ -10,7 +10,7 @@
 output/
 ├── netlogo_prototype/          # NetLogo 参考数据（手动放入）
 ├── python_prototype/           # Python replication CSV
-├── python_extension/           # Python extension CSV + metrics JSON
+├── python_extension/           # Python extension CSV + metrics CSV
 └── python_extension_{N}ticks/  # 长周期 extension 数据（可选）
 ```
 
@@ -40,7 +40,7 @@ output/
 - **生成：** `uv run python -m run.run_extension`
 - **配置：** `src/configs/extension/`（`00.json` … `25.json`，再感染概率 0%–25%）
 - **CSV 示例：** `Virus Extension 10_100_runs-spreadsheet.csv`
-- **指标 JSON：** `10_run_metrics.json`（含 `immune_reinfections_per_run`、`cumulative_reinfections_by_run` 等）
+- **指标 CSV：** `10_run_metrics.csv`（含 `immune_reinfections_per_run`、`cumulative_reinfections_by_run` 等）
 
 ## `python_extension_{N}ticks/`
 

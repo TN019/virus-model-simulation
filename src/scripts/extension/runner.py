@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 from model.simulation import VirusSimulation
@@ -9,6 +8,7 @@ from model.stats import TickRecord
 from scripts.common.conditions import ConditionSpec
 from scripts.common.console import print_condition_done, print_condition_start
 from scripts.common.export import write_behaviorspace_spreadsheet
+from scripts.common.run_metrics import run_metrics_path, write_extension_run_metrics_csv
 
 
 def run_extension_condition(
@@ -44,19 +44,15 @@ def run_extension_condition(
         all_runs=all_runs,
     )
 
-    metrics_path = output_dir / f"{spec.name}_run_metrics.json"
-    metrics_path.write_text(
-        json.dumps(
-            {
-                "condition": spec.name,
-                "immune_reinfection_probability": spec.immune_reinfection_probability,
-                "ticks": config.ticks,
-                "runs": total_runs,
-                "immune_reinfections_per_run": reinfection_counts,
-                "cumulative_reinfections_by_run": cumulative_by_run,
-            },
-            indent=2,
-        )
+    metrics_path = run_metrics_path(output_dir, spec.name)
+    write_extension_run_metrics_csv(
+        metrics_path,
+        condition=spec.name,
+        immune_reinfection_probability=spec.immune_reinfection_probability,
+        ticks=config.ticks,
+        runs=total_runs,
+        immune_reinfections_per_run=reinfection_counts,
+        cumulative_reinfections_by_run=cumulative_by_run,
     )
 
     if show_progress:

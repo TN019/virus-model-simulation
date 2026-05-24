@@ -92,7 +92,7 @@ uv run python -m run.run_extension
 Output:
 
 - CSVs: `output/python_extension/` (`Virus Extension {level}_100_runs-spreadsheet.csv`)
-- Metrics: `output/python_extension/{level}_run_metrics.json` (reinfection counts per run)
+- Metrics: `output/python_extension/{level}_run_metrics.csv` (reinfection counts per run)
 
 Longer horizons (optional):
 

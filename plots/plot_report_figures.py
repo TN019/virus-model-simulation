@@ -558,16 +558,17 @@ def find_extension_csv(data_dir: Path, level: str) -> Path | None:
 
 
 def load_reinfections_per_run(data_dir: Path, level: str) -> list[float]:
-    path = data_dir / f"{level}_run_metrics.json"
-    if not path.exists():
+    from scripts.common.run_metrics import load_extension_run_metrics
+
+    metrics = load_extension_run_metrics(data_dir, level)
+    if metrics is None:
         return []
 
-    data = json.loads(path.read_text(encoding="utf-8"))
-    values = data.get("immune_reinfections_per_run")
-    if values is None:
-        cumulative = data.get("cumulative_reinfections_by_run", [])
-        values = [series[-1] for series in cumulative if series]
-    return [float(value) for value in values]
+    if metrics.immune_reinfections_per_run:
+        return [float(value) for value in metrics.immune_reinfections_per_run]
+
+    cumulative = metrics.cumulative_reinfections_by_run
+    return [float(series[-1]) for series in cumulative if series]
 
 
 def build_per_run_dataset(horizon: str, summary_rows: list[dict] | None = None) -> list[dict]:
@@ -595,7 +596,7 @@ def build_per_run_dataset(horizon: str, summary_rows: list[dict] | None = None) 
             print(f"Could not read infected-count burden for level {level} from {csv_path.name}")
             continue
         if not reinfections:
-            print(f"Could not read reinfection JSON for level {level}")
+            print(f"Could not read reinfection metrics for level {level}")
             continue
 
         expected = expected_by_level.get(level)

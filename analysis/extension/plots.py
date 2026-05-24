@@ -11,6 +11,7 @@ from analysis.common.plots import (
     plot_mean_line,
 )
 from analysis.common.spreadsheet import TickStats, load_tick_stats
+from scripts.common.run_metrics import is_behaviorspace_spreadsheet
 from analysis.common.paths import extension_aggregate, extension_condition
 from analysis.extension.summary import (
     build_extension_metrics,
@@ -103,6 +104,8 @@ def plot_all_extension_trends(
 ) -> list[Path]:
     paths: list[Path] = []
     for csv_path in sorted(data_dir.glob("*.csv")):
+        if not is_behaviorspace_spreadsheet(csv_path):
+            continue
         condition = _condition_name(csv_path)
         label = next((display for key, display, _ in CONDITION_STYLE if key == condition), condition)
         out = extension_condition(analysis_dir, condition, ticks=ticks) / "trends.png"

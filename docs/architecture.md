@@ -36,7 +36,7 @@ plots/                  # Report-ready summary figures (reads output/ + analysis
 
 ### `scripts/`
 
-Loads JSON from `src/configs/`, runs stochastic replicates, writes **BehaviorSpace Spreadsheet v2** CSVs under `output/`. Extension runs also write `{condition}_run_metrics.json` (reinfection counts and cumulative series per run).
+Loads JSON from `src/configs/`, runs stochastic replicates, writes **BehaviorSpace Spreadsheet v2** CSVs under `output/`. Extension runs also write `{condition}_run_metrics.csv` (reinfection counts and cumulative series per run).
 
 Uses **stdlib only** (no matplotlib).
 

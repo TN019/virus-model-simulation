@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import json
 import statistics
 from dataclasses import dataclass
 from pathlib import Path
 
 from analysis.common.spreadsheet import load_per_run_series, load_per_run_summaries
+from scripts.common.run_metrics import is_behaviorspace_spreadsheet, load_extension_run_metrics
 
 EXTENSION_LEVELS: tuple[tuple[str, float], ...] = (
     ("00", 0.0),
@@ -46,6 +46,8 @@ def _condition_name(csv_path: Path) -> str:
 
 def _csv_for_condition(data_dir: Path, condition_key: str) -> Path | None:
     for path in data_dir.glob("*.csv"):
+        if not is_behaviorspace_spreadsheet(path):
+            continue
         if _condition_name(path) == condition_key.lower():
             return path
     return None
@@ -58,21 +60,19 @@ def _time_to_extinction(infected: list[float], max_tick: int) -> int:
     return max_tick
 
 
-def _load_metrics_payload(data_dir: Path, condition_key: str) -> dict:
-    metrics_path = data_dir / f"{condition_key}_run_metrics.json"
-    if not metrics_path.exists():
-        return {}
-    return json.loads(metrics_path.read_text())
-
-
 def _load_reinfection_counts(data_dir: Path, condition_key: str) -> list[int]:
-    payload = _load_metrics_payload(data_dir, condition_key)
-    return [int(value) for value in payload.get("immune_reinfections_per_run", [])]
+    metrics = load_extension_run_metrics(data_dir, condition_key)
+    if metrics is None:
+        return []
+    return list(metrics.immune_reinfections_per_run)
 
 
 def load_mean_cumulative_reinfections(data_dir: Path, condition_key: str) -> tuple[list[int], list[float]]:
-    payload = _load_metrics_payload(data_dir, condition_key)
-    by_run = payload.get("cumulative_reinfections_by_run", [])
+    metrics = load_extension_run_metrics(data_dir, condition_key)
+    if metrics is None:
+        return [], []
+
+    by_run = metrics.cumulative_reinfections_by_run
     if not by_run:
         return [], []
 
