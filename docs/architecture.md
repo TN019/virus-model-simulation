@@ -10,11 +10,21 @@ src/
 │   ├── common/         # Condition loading, BehaviorSpace CSV export, console output
 │   ├── prototype/      # Replication experiment runner
 │   └── extension/      # Extension runner (+ per-run metrics JSON)
-├── run/                # Thin CLI entry points (delegate to scripts/ or analysis/)
-└── analysis/           # Read CSVs / metrics; write figures and markdown tables
-    ├── common/         # Spreadsheet parsing, shared plot helpers, output path helpers
-    ├── replication/    # NetLogo vs Python replication plots and summaries
-    └── extension/      # Extension trends, comparisons, persistence tables
+└── run/                # Thin CLI entry points (delegate to scripts/)
+```
+
+```
+analysis/               # Read CSVs / metrics; write figures and markdown tables
+├── common/             # Spreadsheet parsing, shared plot helpers, output path helpers
+├── replication/        # NetLogo vs Python replication plots and summaries
+├── extension/          # Extension trends, comparisons, persistence tables
+└── results/            # Generated figures and tables (not Python package code)
+```
+
+```
+plots/                  # Report-ready summary figures (reads output/ + analysis/results/)
+├── plot_report_figures.py
+└── output/
 ```
 
 ### `model/`
@@ -26,13 +36,13 @@ src/
 
 ### `scripts/`
 
-Loads JSON from `src/configs/`, runs stochastic replicates, writes **BehaviorSpace Spreadsheet v2** CSVs under `results/data/`. Extension runs also write `{condition}_run_metrics.json` (reinfection counts and cumulative series per run).
+Loads JSON from `src/configs/`, runs stochastic replicates, writes **BehaviorSpace Spreadsheet v2** CSVs under `output/`. Extension runs also write `{condition}_run_metrics.json` (reinfection counts and cumulative series per run).
 
 Uses **stdlib only** (no matplotlib).
 
 ### `analysis/`
 
-Reads experiment output and writes PNG figures and markdown summaries under `results/analysis/`. Requires the optional `analysis` dependency (`matplotlib`).
+Reads experiment output from `output/` and writes PNG figures and markdown summaries under `analysis/results/`. Requires the optional `analysis` dependency (`matplotlib`).
 
 ### `run/`
 
@@ -42,8 +52,12 @@ Entry modules invoked as `python -m run.<module>` (typically via `uv run`):
 |--------|----------------|--------|
 | `run_prototype` | `scripts.prototype` | Replication CSVs |
 | `run_extension` | `scripts.extension` | Extension CSVs + metrics JSON |
-| `plot_figures` | `analysis.replication` | Replication figures |
-| `plot_extension` | `analysis.extension` | Extension figures |
+
+Analysis entry points: `python -m analysis.replication`, `python -m analysis.extension`.
+
+### `plots/`
+
+Standalone report figures that combine raw data and analysis summaries. Output goes to `plots/output/`.
 
 ## Repository layout
 
@@ -54,15 +68,19 @@ virus-model-simulation/
 ├── uv.lock
 ├── .python-version
 │
-├── src/                    # (see code layers above)
+├── src/                    # Model + experiment runners (see above)
 │
-├── results/
-│   ├── data/               # Raw experiment output (CSV + extension metrics)
-│   │   ├── netlogo_prototype/
-│   │   ├── python_prototype/
-│   │   ├── python_extension/
-│   │   └── python_extension_{N}ticks/   # optional long horizons (e.g. 156, 260)
-│   └── analysis/           # Generated figures and tables
+├── output/                 # Raw experiment output (CSV + extension metrics)
+│   ├── netlogo_prototype/
+│   ├── python_prototype/
+│   ├── python_extension/
+│   └── python_extension_{N}ticks/   # optional long horizons (e.g. 156, 260)
+│
+├── analysis/               # Analysis code + generated figures/tables
+│   ├── common/
+│   ├── replication/
+│   ├── extension/
+│   └── results/
 │       ├── replication/
 │       │   ├── netlogo/        # Per-condition trends (NetLogo)
 │       │   ├── python/         # Per-condition trends (Python)
@@ -70,6 +88,9 @@ virus-model-simulation/
 │       └── extension/
 │           ├── 00/ … 25/       # Per-level trends (trends.png)
 │           └── extension/      # Cross-level figures and *.md tables
+│
+├── plots/                  # Report figures
+│   └── output/
 │
 └── docs/
     ├── architecture.md

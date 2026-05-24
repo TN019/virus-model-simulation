@@ -22,7 +22,7 @@ Run all commands from the **project root**.
 uv sync --extra analysis
 ```
 
-`analysis` extra installs matplotlib (needed for `plot_*` only). Running experiments (`run_*`) uses the stdlib only.
+`analysis` extra installs matplotlib (needed for analysis and report plots only). Running experiments (`run_*`) uses the stdlib only.
 
 ---
 
@@ -32,7 +32,7 @@ uv sync --extra analysis
 
 Export BehaviorSpace spreadsheets from NetLogo into:
 
-`results/data/netlogo_prototype/`
+`output/netlogo_prototype/`
 
 Expected filenames (one per condition):
 
@@ -42,7 +42,7 @@ Expected filenames (one per condition):
 - `Virus Low_spread_high_recovery_100_runs-spreadsheet.csv`
 - `Virus High_spread_low_recovery_100_runs-spreadsheet.csv`
 
-Skip if you only need Python-only plots (`plot_figures --mode python`).
+Skip if you only need Python-only plots (`analysis.replication --mode python`).
 
 ### 3. Run Python replication
 
@@ -52,28 +52,28 @@ Configs: `src/configs/prototype/` (default **100 runs × 52 ticks** per conditio
 uv run python -m run.run_prototype
 ```
 
-CSV output: `results/data/python_prototype/`
+CSV output: `output/python_prototype/`
 
 ### 4. Plot replication
 
 ```bash
-uv run python -m run.plot_figures
+uv run python -m analysis.replication
 ```
 
 Partial modes:
 
 ```bash
-uv run python -m run.plot_figures --mode netlogo
-uv run python -m run.plot_figures --mode python
-uv run python -m run.plot_figures --mode compare
+uv run python -m analysis.replication --mode netlogo
+uv run python -m analysis.replication --mode python
+uv run python -m analysis.replication --mode compare
 ```
 
 | Output | Location |
 |--------|----------|
-| NetLogo trend plots | `results/analysis/replication/netlogo/*.png` |
-| Python trend plots | `results/analysis/replication/python/*.png` |
-| Python vs NetLogo (4 panels) | `results/analysis/replication/comparison/*_replication_compare.png` |
-| Summary tables | `results/analysis/replication/comparison/*_summary.md` |
+| NetLogo trend plots | `analysis/results/replication/netlogo/*.png` |
+| Python trend plots | `analysis/results/replication/python/*.png` |
+| Python vs NetLogo (4 panels) | `analysis/results/replication/comparison/*_replication_compare.png` |
+| Summary tables | `analysis/results/replication/comparison/*_summary.md` |
 
 ---
 
@@ -91,52 +91,52 @@ uv run python -m run.run_extension
 
 Output:
 
-- CSVs: `results/data/python_extension/` (`Virus Extension {level}_100_runs-spreadsheet.csv`)
-- Metrics: `results/data/python_extension/{level}_run_metrics.json` (reinfection counts per run)
+- CSVs: `output/python_extension/` (`Virus Extension {level}_100_runs-spreadsheet.csv`)
+- Metrics: `output/python_extension/{level}_run_metrics.json` (reinfection counts per run)
 
 Longer horizons (optional):
 
 ```bash
-uv run python -m run.run_extension --ticks 156 --output-dir results/data/python_extension_156ticks
-uv run python -m run.run_extension --ticks 260 --output-dir results/data/python_extension_260ticks
+uv run python -m run.run_extension --ticks 156 --output-dir output/python_extension_156ticks
+uv run python -m run.run_extension --ticks 260 --output-dir output/python_extension_260ticks
 ```
 
 ### 6. Plot extension
 
 ```bash
-uv run python -m run.plot_extension
+uv run python -m analysis.extension
 ```
 
-Long-horizon data (read from `results/data/python_extension_{N}ticks/`, write figures under `results/analysis/extension_{N}ticks/`):
+Long-horizon data (read from `output/python_extension_{N}ticks/`, write figures under `analysis/results/extension_{N}ticks/`):
 
 ```bash
-uv run python -m run.plot_extension --ticks 156
-uv run python -m run.plot_extension --ticks 260
+uv run python -m analysis.extension --ticks 156
+uv run python -m analysis.extension --ticks 260
 ```
 
-`plot_extension` uses `--data-dir` and `--analysis-dir` (not `--output-dir`; that flag is only on `run_extension`).
+`analysis.extension` uses `--data-dir` and `--analysis-dir` (not `--output-dir`; that flag is only on `run_extension`).
 
 Partial modes: `trends`, `compare`, `survival`, `summary`, or `all` (default).
 
 | Output | Location |
 |--------|----------|
-| Per-level trend + cumulative reinfections | `results/analysis/extension/{00,01,02,05,10,25}/trends.png` |
-| Multi-level comparison (4 panels) | `results/analysis/extension/extension/reinfection_levels_compare.png` |
-| Panels by metric | `results/analysis/extension/extension/{sick,immune,healthy,total}_by_reinfection.png` |
-| Survival curve | `results/analysis/extension/extension/infection_survival_curve.png` |
-| Total reinfections vs probability | `results/analysis/extension/extension/total_reinfections_by_probability.png` |
-| Tables | `results/analysis/extension/extension/persistence.md`, `secondary_metrics.md` |
+| Per-level trend + cumulative reinfections | `analysis/results/extension/{00,01,02,05,10,25}/trends.png` |
+| Multi-level comparison (4 panels) | `analysis/results/extension/extension/reinfection_levels_compare.png` |
+| Panels by metric | `analysis/results/extension/extension/{sick,immune,healthy,total}_by_reinfection.png` |
+| Survival curve | `analysis/results/extension/extension/infection_survival_curve.png` |
+| Total reinfections vs probability | `analysis/results/extension/extension/total_reinfections_by_probability.png` |
+| Tables | `analysis/results/extension/extension/persistence.md`, `secondary_metrics.md` |
 
 ---
 
 ## End-to-end (copy-paste)
 
-**Replication only** (with NetLogo CSVs already in `results/data/netlogo_prototype/`):
+**Replication only** (with NetLogo CSVs already in `output/netlogo_prototype/`):
 
 ```bash
 uv sync --extra analysis
 uv run python -m run.run_prototype
-uv run python -m run.plot_figures
+uv run python -m analysis.replication
 ```
 
 **Extension only:**
@@ -144,7 +144,7 @@ uv run python -m run.plot_figures
 ```bash
 uv sync --extra analysis
 uv run python -m run.run_extension
-uv run python -m run.plot_extension
+uv run python -m analysis.extension
 ```
 
 **Both:**
@@ -152,23 +152,24 @@ uv run python -m run.plot_extension
 ```bash
 uv sync --extra analysis
 uv run python -m run.run_prototype
-uv run python -m run.plot_figures
+uv run python -m analysis.replication
 uv run python -m run.run_extension
-uv run python -m run.plot_extension
+uv run python -m analysis.extension
 ```
 
 ---
 
 ## Data layout (summary)
 
-See [`results/README.md`](results/README.md) for what each folder and file type means.
+See [`output/README.md`](output/README.md) and [`analysis/README.md`](analysis/README.md) for what each folder and file type means.
 
 | Role | Path |
 |------|------|
-| NetLogo replication CSVs | `results/data/netlogo_prototype/` |
-| Python replication CSVs | `results/data/python_prototype/` |
-| Python extension CSVs + metrics | `results/data/python_extension/` |
-| Replication analysis | `results/analysis/replication/` |
-| Extension analysis | `results/analysis/extension/` |
+| NetLogo replication CSVs | `output/netlogo_prototype/` |
+| Python replication CSVs | `output/python_prototype/` |
+| Python extension CSVs + metrics | `output/python_extension/` |
+| Replication analysis | `analysis/results/replication/` |
+| Extension analysis | `analysis/results/extension/` |
+| Report figures | `plots/output/` |
 
-CLI overrides: `--runs`, `--ticks`, `--seed`, `--config-dir`, `--output-dir` on `run_*`; `--data-dir`, `--analysis-dir`, `--mode` on `plot_*`.
+CLI overrides: `--runs`, `--ticks`, `--seed`, `--config-dir`, `--output-dir` on `run_*`; `--data-dir`, `--analysis-dir`, `--mode` on `analysis.*`.

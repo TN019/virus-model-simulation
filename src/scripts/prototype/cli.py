@@ -7,7 +7,7 @@ from scripts.common.conditions import DEFAULT_PROTOTYPE_DIR, load_conditions
 from scripts.common.console import print_header
 from scripts.prototype.runner import run_all
 
-DEFAULT_OUTPUT = Path("results/data/python_prototype")
+DEFAULT_OUTPUT = Path("output/python_prototype")
 
 
 def main(argv: list[str] | None = None) -> None:

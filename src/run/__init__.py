@@ -1,1 +1,1 @@
-"""CLI entry points for experiments and analysis."""
+"""CLI entry points for experiment runs."""

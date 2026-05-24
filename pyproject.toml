@@ -21,8 +21,8 @@ packages = [
     "src/scripts/common",
     "src/scripts/prototype",
     "src/scripts/extension",
-    "src/analysis",
-    "src/analysis/common",
-    "src/analysis/replication",
-    "src/analysis/extension",
+    "analysis",
+    "analysis/common",
+    "analysis/replication",
+    "analysis/extension",
 ]

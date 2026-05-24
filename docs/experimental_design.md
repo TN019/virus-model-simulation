@@ -62,7 +62,7 @@ These five conditions vary transmission and recovery only (fixed duration and im
 | Peak week | Tick at which peak sick occurs |
 | Final sick / immune / healthy / total | Values at the last tick |
 
-**Across runs:** mean ± standard deviation; written to `results/analysis/replication/comparison/*_summary.md`.
+**Across runs:** mean ± standard deviation; written to `analysis/results/replication/comparison/*_summary.md`.
 
 ### 2.5 Replication comparison method
 
@@ -70,12 +70,12 @@ Comparison does **not** require identical values at every tick.
 
 **Visual**
 
-- Single-source trends: `results/analysis/replication/netlogo/*.png`, `results/analysis/replication/python/*.png`.
-- Overlay: `results/analysis/replication/comparison/*_replication_compare.png` — four panels (sick, immune, healthy, total), NetLogo mean vs Python mean.
+- Single-source trends: `analysis/results/replication/netlogo/*.png`, `analysis/results/replication/python/*.png`.
+- Overlay: `analysis/results/replication/comparison/*_replication_compare.png` — four panels (sick, immune, healthy, total), NetLogo mean vs Python mean.
 
 **Tabular**
 
-- `results/analysis/replication/comparison/*_summary.md` — peak and final metrics, NetLogo mean ± SD, Python mean ± SD, difference (Python − NetLogo).
+- `analysis/results/replication/comparison/*_summary.md` — peak and final metrics, NetLogo mean ± SD, Python mean ± SD, difference (Python − NetLogo).
 
 **Judgement questions**
 
@@ -89,14 +89,14 @@ Comparison does **not** require identical values at every tick.
 
 | Role | Path |
 |------|------|
-| NetLogo BehaviorSpace CSVs | `results/data/netlogo_prototype/` |
-| Python replication CSVs | `results/data/python_prototype/` |
-| Analysis output | `results/analysis/replication/` |
+| NetLogo BehaviorSpace CSVs | `output/netlogo_prototype/` |
+| Python replication CSVs | `output/python_prototype/` |
+| Analysis output | `analysis/results/replication/` |
 
 ```bash
 uv run python -m run.run_prototype          # generate Python CSVs
-uv run python -m run.plot_figures            # all modes: netlogo, python, compare
-uv run python -m run.plot_figures --mode compare
+uv run python -m analysis.replication            # all modes: netlogo, python, compare
+uv run python -m analysis.replication --mode compare
 ```
 
 NetLogo export filenames must match config `output_file` values (e.g. `Virus Baseline_100_runs-spreadsheet.csv`).
@@ -159,27 +159,27 @@ Effects may be non-linear (e.g. very high reinfection increasing turnover withou
 
 | Role | Path |
 |------|------|
-| Extension CSVs + metrics | `results/data/python_extension/` |
-| Long horizon (optional) | `results/data/python_extension_{N}ticks/` (e.g. 156, 260) |
+| Extension CSVs + metrics | `output/python_extension/` |
+| Long horizon (optional) | `output/python_extension_{N}ticks/` (e.g. 156, 260) |
 
-**Analysis output** (`uv run python -m run.plot_extension`):
+**Analysis output** (`uv run python -m analysis.extension`):
 
 | Output | Path |
 |--------|------|
-| Per-level trend + cumulative reinfections | `results/analysis/extension/{00,01,02,05,10,25}/trends.png` |
-| Multi-level comparison (4 panels) | `results/analysis/extension/extension/reinfection_levels_compare.png` |
-| Panels by metric | `results/analysis/extension/extension/{sick,immune,healthy,total}_by_reinfection.png` |
-| Survival curve | `results/analysis/extension/extension/infection_survival_curve.png` |
-| Total reinfections vs probability | `results/analysis/extension/extension/total_reinfections_by_probability.png` |
-| Persistence table | `results/analysis/extension/extension/persistence.md` |
-| Secondary metrics | `results/analysis/extension/extension/secondary_metrics.md` |
+| Per-level trend + cumulative reinfections | `analysis/results/extension/{00,01,02,05,10,25}/trends.png` |
+| Multi-level comparison (4 panels) | `analysis/results/extension/extension/reinfection_levels_compare.png` |
+| Panels by metric | `analysis/results/extension/extension/{sick,immune,healthy,total}_by_reinfection.png` |
+| Survival curve | `analysis/results/extension/extension/infection_survival_curve.png` |
+| Total reinfections vs probability | `analysis/results/extension/extension/total_reinfections_by_probability.png` |
+| Persistence table | `analysis/results/extension/extension/persistence.md` |
+| Secondary metrics | `analysis/results/extension/extension/secondary_metrics.md` |
 
-For `--ticks 156` or `260`, analysis writes under `results/analysis/extension_{N}ticks/` with the same internal layout (`00/` … `25/`, `extension/`).
+For `--ticks 156` or `260`, analysis writes under `analysis/results/extension_{N}ticks/` with the same internal layout (`00/` … `25/`, `extension/`).
 
 ```bash
 uv run python -m run.run_extension
-uv run python -m run.run_extension --ticks 156 --output-dir results/data/python_extension_156ticks
-uv run python -m run.plot_extension --ticks 156
+uv run python -m run.run_extension --ticks 156 --output-dir output/python_extension_156ticks
+uv run python -m analysis.extension --ticks 156
 ```
 
 ### 3.6 Hypothesis

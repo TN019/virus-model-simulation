@@ -7,7 +7,7 @@ from scripts.common.conditions import DEFAULT_EXTENSION_DIR, load_conditions
 from scripts.common.console import print_header
 from scripts.extension.runner import run_all_extension
 
-DEFAULT_OUTPUT = Path("results/data/python_extension")
+DEFAULT_OUTPUT = Path("output/python_extension")
 
 
 def main(argv: list[str] | None = None) -> None:
