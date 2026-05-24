@@ -1,10 +1,8 @@
+"""Execute extension experiments and export CSV plus reinfection metrics."""
 from __future__ import annotations
-
 from pathlib import Path
-
 from model.simulation import VirusSimulation
 from model.stats import TickRecord
-
 from scripts.common.conditions import ConditionSpec
 from scripts.common.console import print_condition_done, print_condition_start
 from scripts.common.export import write_behaviorspace_spreadsheet
@@ -20,6 +18,11 @@ def run_extension_condition(
     base_seed: int | None = None,
     show_progress: bool = True,
 ) -> tuple[Path, Path]:
+    """
+    Run all replicates for one extension level.
+    Writes BehaviorSpace CSV and a reinfection metrics sidecar CSV.
+    Assumes run i uses seed base_seed + i.
+    """
     config = spec.to_config(runs=runs, ticks=ticks, base_seed=base_seed)
     total_runs = config.runs
     all_runs: list[list[TickRecord]] = []
@@ -68,6 +71,7 @@ def run_all_extension(
     ticks: int | None = None,
     base_seed: int | None = None,
 ) -> list[Path]:
+    """Run every extension level; return spreadsheet and metrics paths."""
     paths: list[Path] = []
     for spec in conditions:
         csv_path, metrics_path = run_extension_condition(

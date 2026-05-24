@@ -1,12 +1,15 @@
+"""Simulation parameter bundle loaded from JSON experiment configs."""
 from __future__ import annotations
-
 import json
 from dataclasses import dataclass
 from pathlib import Path
 
-
 @dataclass(frozen=True)
 class SimulationConfig:
+    """
+    Immutable parameters for one Virus model experiment condition.
+    Field names mirror NetLogo model variables and BehaviorSpace setup.
+    """
     name: str = "prototype"
     number_people: int = 150
     initial_infected: int = 10
@@ -25,5 +28,6 @@ class SimulationConfig:
 
     @classmethod
     def from_json(cls, path: str | Path) -> SimulationConfig:
+        """Load a config from JSON, ignoring unknown keys."""
         data = json.loads(Path(path).read_text())
         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})

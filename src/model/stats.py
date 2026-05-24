@@ -1,13 +1,13 @@
+"""Per-tick population aggregates for export and analysis."""
 from __future__ import annotations
-
 from dataclasses import dataclass
-
 from model.person import Person
 from model.state import HealthState
 
 
 @dataclass(frozen=True)
 class TickRecord:
+    """Snapshot of population counts and percentages at one tick."""
     tick: int
     susceptible: int
     infected: int
@@ -18,6 +18,7 @@ class TickRecord:
 
 
 def population_counts(people: list[Person]) -> tuple[int, int, int, int]:
+    """Return (susceptible, infected, immune, total) for the current population."""
     infected = sum(1 for p in people if p.health_state == HealthState.INFECTIOUS)
     immune = sum(1 for p in people if p.health_state == HealthState.IMMUNE)
     total = len(people)
@@ -26,6 +27,7 @@ def population_counts(people: list[Person]) -> tuple[int, int, int, int]:
 
 
 def record_tick(tick: int, people: list[Person]) -> TickRecord:
+    """Build one tick record; assumes an empty population yields zero percentages."""
     susceptible, infected, immune, total = population_counts(people)
     if total == 0:
         return TickRecord(tick, 0, 0, 0, 0, 0.0, 0.0)

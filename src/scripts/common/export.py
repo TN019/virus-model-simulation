@@ -1,14 +1,16 @@
+"""Write BehaviorSpace Spreadsheet v2 CSV files for NetLogo comparison."""
 from __future__ import annotations
-
 import csv
 import statistics
 from datetime import datetime, timezone
 from pathlib import Path
-
 from model.config import SimulationConfig
 from model.stats import TickRecord
 
+# Number of metric columns per run in BehaviorSpace spreadsheet layout.
 METRICS_PER_RUN = 8
+
+# Column headers for each run block (NetLogo reporter names).
 METRIC_HEADERS = (
     "[step]",
     "ticks",
@@ -22,14 +24,17 @@ METRIC_HEADERS = (
 
 
 def _repeat_run_numbers(num_runs: int) -> list[str]:
+    """Flatten run indices 1..N repeated for each metric column."""
     return [str(run_id) for run_id in range(1, num_runs + 1) for _ in range(METRICS_PER_RUN)]
 
 
 def _repeat_metric_headers(num_runs: int) -> list[str]:
+    """Repeat METRIC_HEADERS once per run for wide spreadsheet columns."""
     return list(METRIC_HEADERS) * num_runs
 
 
 def _final_metric_columns(records: list[TickRecord]) -> list[str]:
+    """Format the last tick of one run as eight BehaviorSpace metric strings."""
     final = records[-1]
     return [
         str(final.tick),
@@ -73,6 +78,10 @@ def write_behaviorspace_spreadsheet(
     config: SimulationConfig,
     all_runs: list[list[TickRecord]],
 ) -> None:
+    """
+    Write one BehaviorSpace Spreadsheet v2 file for all runs of a condition.
+    Layout: metadata rows, per-run parameter rows, summary rows, then all tick data.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     num_runs = len(all_runs)
     half = config.world_size // 2
@@ -82,7 +91,10 @@ def write_behaviorspace_spreadsheet(
         writer.writerow(["BehaviorSpace results (Python virus-model)", "Spreadsheet version 2.0"])
         writer.writerow(["Virus (Python replication)"])
         writer.writerow([experiment_name])
-        writer.writerow([datetime.now(timezone.utc).astimezone().isoformat(timespec="milliseconds")])
+        timestamp = datetime.now(timezone.utc).astimezone().isoformat(
+            timespec="milliseconds",
+        )
+        writer.writerow([timestamp])
         writer.writerow(["min-pxcor", "max-pxcor", "min-pycor", "max-pycor"])
         writer.writerow([str(-half), str(half), str(-half), str(half)])
 
@@ -110,13 +122,11 @@ def write_behaviorspace_spreadsheet(
             ]
         )
         if config.immune_reinfection_probability > 0:
+            probability = config.immune_reinfection_probability
             writer.writerow(
                 [
                     "immune-reinfection-probability",
-                    *[
-                        str(config.immune_reinfection_probability)
-                        for _ in range(num_runs * METRICS_PER_RUN)
-                    ],
+                    *[str(probability) for _ in range(num_runs * METRICS_PER_RUN)],
                 ]
             )
 
@@ -133,6 +143,7 @@ def write_behaviorspace_spreadsheet(
         )
         writer.writerow([])
 
+        # All runs interleaved: one row per tick, columns grouped by run.
         writer.writerow(["[all run data]", *_repeat_metric_headers(num_runs)])
         num_ticks = len(all_runs[0])
         for tick_idx in range(num_ticks):

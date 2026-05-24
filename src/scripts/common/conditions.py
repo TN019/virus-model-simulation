@@ -1,11 +1,11 @@
+"""Load experiment condition definitions from JSON config files."""
 from __future__ import annotations
-
 import json
 from dataclasses import dataclass
 from pathlib import Path
-
 from model.config import SimulationConfig
 
+# Default config directories relative to the src tree (see configs/).
 _SRC_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PROTOTYPE_DIR = _SRC_ROOT / "configs" / "prototype"
 DEFAULT_EXTENSION_DIR = _SRC_ROOT / "configs" / "extension"
@@ -13,6 +13,10 @@ DEFAULT_EXTENSION_DIR = _SRC_ROOT / "configs" / "extension"
 
 @dataclass(frozen=True)
 class ConditionSpec:
+    """
+    One experiment condition as read from configs/*.json.
+    Merges into SimulationConfig; CLI may override runs, ticks, and base_seed.
+    """
     name: str
     output_file: str
     infectiousness: float
@@ -32,6 +36,7 @@ class ConditionSpec:
 
     @classmethod
     def from_json(cls, path: str | Path) -> ConditionSpec:
+        """Parse one JSON file into a ConditionSpec."""
         data = json.loads(Path(path).read_text())
         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
 
@@ -42,6 +47,7 @@ class ConditionSpec:
         ticks: int | None = None,
         base_seed: int | None = None,
     ) -> SimulationConfig:
+        """Build a SimulationConfig, applying optional CLI overrides."""
         return SimulationConfig(
             name=self.name,
             number_people=self.number_people,
@@ -62,6 +68,7 @@ class ConditionSpec:
 
 
 def load_conditions(config_dir: str | Path) -> tuple[ConditionSpec, ...]:
+    """Load all *.json conditions from a directory in sorted filename order."""
     directory = Path(config_dir)
     paths = sorted(directory.glob("*.json"))
     if not paths:

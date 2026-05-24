@@ -1,14 +1,19 @@
+"""CSV sidecar files for extension immune-reinfection metrics."""
+
 from __future__ import annotations
 
 import csv
 from dataclasses import dataclass
 from pathlib import Path
 
+# Filename suffix for per-condition reinfection metrics (not BehaviorSpace CSV).
 RUN_METRICS_SUFFIX = "_run_metrics.csv"
 
 
 @dataclass(frozen=True)
 class ExtensionRunMetricsData:
+    """Reinfection counters for one extension condition (all runs)."""
+
     condition: str
     immune_reinfection_probability: float
     ticks: int
@@ -18,14 +23,17 @@ class ExtensionRunMetricsData:
 
 
 def run_metrics_path(output_dir: Path, condition: str) -> Path:
+    """Path to the metrics CSV for one condition key (e.g. '10')."""
     return output_dir / f"{condition}{RUN_METRICS_SUFFIX}"
 
 
 def is_run_metrics_csv(path: Path) -> bool:
+    """True if path is an extension metrics sidecar, not a spreadsheet export."""
     return path.name.endswith(RUN_METRICS_SUFFIX)
 
 
 def is_behaviorspace_spreadsheet(path: Path) -> bool:
+    """True for main experiment CSV exports, excluding metrics sidecars."""
     return path.suffix.lower() == ".csv" and not is_run_metrics_csv(path)
 
 
@@ -39,6 +47,7 @@ def write_extension_run_metrics_csv(
     immune_reinfections_per_run: list[int],
     cumulative_reinfections_by_run: list[list[int]],
 ) -> None:
+    """Write metadata and per-run reinfection tables to a sectioned CSV file."""
     path.parent.mkdir(parents=True, exist_ok=True)
     tick_columns = [f"tick_{index}" for index in range(ticks)]
 
@@ -46,7 +55,9 @@ def write_extension_run_metrics_csv(
         writer = csv.writer(handle)
         writer.writerow(["section", "key", "value"])
         writer.writerow(["metadata", "condition", condition])
-        writer.writerow(["metadata", "immune_reinfection_probability", immune_reinfection_probability])
+        writer.writerow(
+            ["metadata", "immune_reinfection_probability", immune_reinfection_probability],
+        )
         writer.writerow(["metadata", "ticks", ticks])
         writer.writerow(["metadata", "runs", runs])
         writer.writerow([])
@@ -62,6 +73,7 @@ def write_extension_run_metrics_csv(
 
 
 def load_extension_run_metrics_csv(path: Path) -> ExtensionRunMetricsData:
+    """Parse a metrics CSV written by write_extension_run_metrics_csv."""
     metadata: dict[str, str] = {}
     immune_reinfections_per_run: list[int] = []
     cumulative_reinfections_by_run: list[list[int]] = []
@@ -94,33 +106,45 @@ def load_extension_run_metrics_csv(path: Path) -> ExtensionRunMetricsData:
                 if current_section == section and len(row) >= 3:
                     cumulative_reinfections_by_run.append([int(value) for value in row[2:]])
 
+    cumulative = tuple(tuple(series) for series in cumulative_reinfections_by_run)
     return ExtensionRunMetricsData(
         condition=metadata.get("condition", ""),
-        immune_reinfection_probability=float(metadata.get("immune_reinfection_probability", 0)),
+        immune_reinfection_probability=float(
+            metadata.get("immune_reinfection_probability", 0),
+        ),
         ticks=int(metadata.get("ticks", 0)),
         runs=int(metadata.get("runs", 0)),
         immune_reinfections_per_run=tuple(immune_reinfections_per_run),
-        cumulative_reinfections_by_run=tuple(tuple(series) for series in cumulative_reinfections_by_run),
+        cumulative_reinfections_by_run=cumulative,
     )
 
 
 def _load_legacy_json_metrics(path: Path) -> ExtensionRunMetricsData:
+    """Read old JSON metrics files for backward compatibility (analysis only)."""
     import json
 
     payload = json.loads(path.read_text())
+    per_run = payload.get("immune_reinfections_per_run", [])
+    cumulative = payload.get("cumulative_reinfections_by_run", [])
     return ExtensionRunMetricsData(
         condition=str(payload.get("condition", "")),
-        immune_reinfection_probability=float(payload.get("immune_reinfection_probability", 0)),
+        immune_reinfection_probability=float(
+            payload.get("immune_reinfection_probability", 0),
+        ),
         ticks=int(payload.get("ticks", 0)),
         runs=int(payload.get("runs", 0)),
-        immune_reinfections_per_run=tuple(int(v) for v in payload.get("immune_reinfections_per_run", [])),
+        immune_reinfections_per_run=tuple(int(v) for v in per_run),
         cumulative_reinfections_by_run=tuple(
-            tuple(int(v) for v in series) for series in payload.get("cumulative_reinfections_by_run", [])
+            tuple(int(v) for v in series) for series in cumulative
         ),
     )
 
 
-def load_extension_run_metrics(data_dir: Path, condition_key: str) -> ExtensionRunMetricsData | None:
+def load_extension_run_metrics(
+    data_dir: Path,
+    condition_key: str,
+) -> ExtensionRunMetricsData | None:
+    """Load metrics for one condition from CSV, or legacy JSON if present."""
     csv_path = run_metrics_path(data_dir, condition_key)
     if csv_path.exists():
         return load_extension_run_metrics_csv(csv_path)

@@ -1,10 +1,8 @@
+"""Execute replication (prototype) experiments and export CSVs."""
 from __future__ import annotations
-
 from pathlib import Path
-
 from model.simulation import VirusSimulation
 from model.stats import TickRecord
-
 from scripts.common.conditions import ConditionSpec
 from scripts.common.console import print_condition_done, print_condition_start
 from scripts.common.export import write_behaviorspace_spreadsheet
@@ -19,6 +17,10 @@ def run_condition(
     base_seed: int | None = None,
     show_progress: bool = True,
 ) -> Path:
+    """
+    Run all replicates for one condition and write one BehaviorSpace CSV.
+    Assumes run i uses seed base_seed + i (from config or CLI override).
+    """
     config = spec.to_config(runs=runs, ticks=ticks, base_seed=base_seed)
     total_runs = config.runs
     all_runs: list[list[TickRecord]] = []
@@ -50,6 +52,7 @@ def run_all(
     ticks: int | None = None,
     base_seed: int | None = None,
 ) -> list[Path]:
+    """Run every condition in order; return paths to written spreadsheet CSVs."""
     paths: list[Path] = []
     for spec in conditions:
         paths.append(
