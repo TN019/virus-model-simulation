@@ -1,6 +1,6 @@
 section,key,value
 metadata,condition,10
-metadata,immune_reinfection_probability,10.0
+metadata,immune_reinfection_probability,10
 metadata,ticks,52
 metadata,runs,100
 
