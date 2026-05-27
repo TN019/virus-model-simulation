@@ -32,20 +32,12 @@ def main(argv: list[str] | None = None) -> None:
 
     if args.mode in ("netlogo", "all"):
         written.extend(
-            plot_all_source(
-                args.netlogo_data_dir,
-                replication_netlogo(args.analysis_dir),
-                source_label="NetLogo",
-            )
+            plot_all_source(args.netlogo_data_dir, replication_netlogo(args.analysis_dir))
         )
 
     if args.mode in ("python", "all"):
         written.extend(
-            plot_all_source(
-                args.python_data_dir,
-                replication_python(args.analysis_dir),
-                source_label="Python",
-            )
+            plot_all_source(args.python_data_dir, replication_python(args.analysis_dir))
         )
 
     if args.mode in ("compare", "all"):

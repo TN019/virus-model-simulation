@@ -60,8 +60,6 @@ def plot_extension_trend_with_reinfections(
     csv_path: Path,
     data_dir: Path,
     output_path: Path,
-    *,
-    title: str,
 ) -> Path:
     condition = _condition_name(csv_path)
     stats = load_tick_stats(csv_path)
@@ -78,13 +76,14 @@ def plot_extension_trend_with_reinfections(
         band = getattr(stats, attr)
         axes[0].plot(stats.tick, band.mean, label=label, color=color, linewidth=1.8)
 
-    axes[0].set_title(title)
+    axes[0].set_title("Number of people")
     axes[0].set_ylabel("Number of people")
     axes[0].legend(loc="upper right", fontsize=9)
     axes[0].grid(True, alpha=0.3)
 
     if weeks and cumulative:
         axes[1].plot(weeks, cumulative, color="tab:purple", linewidth=1.8)
+    axes[1].set_title("Cumulative immune reinfection events")
     axes[1].set_xlabel("Week")
     axes[1].set_ylabel("Cumulative immune reinfection events")
     axes[1].grid(True, alpha=0.3)
@@ -107,14 +106,8 @@ def plot_all_extension_trends(
         if not is_behaviorspace_spreadsheet(csv_path):
             continue
         condition = _condition_name(csv_path)
-        label = next((display for key, display, _ in CONDITION_STYLE if key == condition), condition)
         out = extension_condition(analysis_dir, condition, ticks=ticks) / "trends.png"
-        plot_extension_trend_with_reinfections(
-            csv_path,
-            data_dir,
-            out,
-            title=f"Extension — {label}",
-        )
+        plot_extension_trend_with_reinfections(csv_path, data_dir, out)
         paths.append(out)
     return paths
 
@@ -129,7 +122,7 @@ def plot_total_reinfections_by_probability(data_dir: Path, output_path: Path) ->
 
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot(probabilities, counts, marker="o", color="tab:purple", linewidth=1.8)
-    ax.set_title("Extension — total immune reinfections across all runs")
+    ax.set_title("Total reinfections (all runs)")
     ax.set_xlabel("Reinfection probability")
     ax.set_ylabel("Total reinfections (all runs)")
     ax.set_xticks(probabilities)
@@ -215,7 +208,6 @@ def plot_extension_conditions_compare(data_dir: Path, output_path: Path) -> Path
     for ax in axes[1]:
         ax.set_xlabel("Week")
 
-    fig.suptitle("Extension — reinfection level comparison", y=1.02)
     fig.tight_layout()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_path, dpi=FIGURE_DPI, bbox_inches="tight")
@@ -238,7 +230,7 @@ def plot_infection_survival_curve(data_dir: Path, output_path: Path) -> Path:
             linewidth=1.8,
         )
 
-    ax.set_title("Extension — proportion of runs with infection present")
+    ax.set_title("Proportion of runs (infected > 0)")
     ax.set_xlabel("Tick")
     ax.set_ylabel("Proportion of runs (infected > 0)")
     ax.set_ylim(0, 1.05)
@@ -265,11 +257,11 @@ def plot_extension_panels_by_metric(data_dir: Path, output_dir: Path) -> list[Pa
         aligned.append((key, label, color, stats))
 
     paths: list[Path] = []
-    for _, attr, ylabel in COMPARE_PANELS:
+    for attr, ylabel in COMPARE_PANELS:
         fig, ax = plt.subplots(figsize=(10, 5))
         for _, label, color, stats in aligned:
             plot_mean_line(ax, ticks, getattr(stats, attr), label=label, color=color)
-        ax.set_title(f"Extension — {ylabel}")
+        ax.set_title(ylabel)
         ax.set_xlabel("Week")
         ax.set_ylabel("Number of people")
         ax.legend(loc="best", fontsize=7)

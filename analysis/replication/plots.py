@@ -30,8 +30,6 @@ def plot_replication_compare(
     python_csv: Path,
     netlogo_csv: Path,
     output_path: Path,
-    *,
-    title: str,
 ) -> Path:
     python_stats = load_tick_stats(python_csv)
     netlogo_stats = load_tick_stats(netlogo_csv)
@@ -42,12 +40,12 @@ def plot_replication_compare(
     fig, axes = plt.subplots(2, 2, figsize=(12, 9), sharex=True)
     axes_flat = axes.flatten()
 
-    for ax, (panel, attr, ylabel) in zip(axes_flat, COMPARE_PANELS, strict=True):
+    for ax, (attr, ylabel) in zip(axes_flat, COMPARE_PANELS, strict=True):
         py_band = getattr(python_stats, attr)
         nl_band = getattr(netlogo_stats, attr)
         ax.plot(ticks, nl_band.mean, label="NetLogo mean", color="tab:orange", linewidth=1.8)
         ax.plot(ticks, py_band.mean, label="Python mean", color="tab:blue", linewidth=1.8)
-        ax.set_title(f"Panel {panel}: {ylabel}")
+        ax.set_title(ylabel)
         ax.set_ylabel(ylabel)
         ax.legend(loc="best", fontsize=8)
         ax.grid(True, alpha=0.3)
@@ -55,7 +53,6 @@ def plot_replication_compare(
     for ax in axes[1]:
         ax.set_xlabel("Week")
 
-    fig.suptitle(title, y=1.02)
     fig.tight_layout()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_path, dpi=FIGURE_DPI, bbox_inches="tight")
@@ -63,17 +60,12 @@ def plot_replication_compare(
     return output_path
 
 
-def plot_all_source(
-    data_dir: Path,
-    output_dir: Path,
-    *,
-    source_label: str,
-) -> list[Path]:
+def plot_all_source(data_dir: Path, output_dir: Path) -> list[Path]:
     paths: list[Path] = []
     for csv_path in sorted(data_dir.glob("*.csv")):
         condition = _condition_name(csv_path)
         out = output_dir / f"{_safe_name(condition)}.png"
-        plot_population_trends(csv_path, out, title=f"{source_label} {condition}")
+        plot_population_trends(csv_path, out)
         paths.append(out)
     return paths
 
@@ -97,7 +89,6 @@ def plot_all_replication(
                 python_csv,
                 netlogo_csv,
                 output_dir / f"{safe}_replication_compare.png",
-                title=f"Replication compare — {condition}",
             )
         )
         rows = build_summary_rows(python_csv, netlogo_csv)

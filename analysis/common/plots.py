@@ -16,10 +16,10 @@ SERIES_STYLE = (
 )
 
 COMPARE_PANELS = (
-    ("A", "sick", "Sick people"),
-    ("B", "immune", "Immune people"),
-    ("C", "healthy", "Healthy people"),
-    ("D", "total", "Total people"),
+    ("sick", "Sick people"),
+    ("immune", "Immune people"),
+    ("healthy", "Healthy people"),
+    ("total", "Total people"),
 )
 
 
@@ -51,12 +51,7 @@ def plot_mean_line(ax, ticks: list[int], band, *, label: str, color: str) -> Non
     ax.plot(ticks, band.mean, label=label, color=color, linewidth=1.8)
 
 
-def plot_population_trends(
-    csv_path: Path,
-    output_path: Path,
-    *,
-    title: str,
-) -> Path:
+def plot_population_trends(csv_path: Path, output_path: Path) -> Path:
     stats = load_tick_stats(csv_path)
     ticks = stats.tick
 
@@ -64,7 +59,6 @@ def plot_population_trends(
     for attr, label, color in SERIES_STYLE:
         plot_mean_line(ax, ticks, getattr(stats, attr), label=label, color=color)
 
-    ax.set_title(title)
     ax.set_xlabel("Week")
     ax.set_ylabel("Number of people")
     ax.legend(loc="upper right", fontsize=9)

@@ -204,7 +204,6 @@ def write_replication_summary_table(rows: list[dict]) -> None:
     save_table_png(
         table_for_png,
         OUTPUT_DIR / "replication_summary_table.png",
-        title="Replication summary table",
         column_widths=[0.17, 0.13, 0.18, 0.18, 0.16, 0.28],
         font_size=8,
     )
@@ -228,7 +227,6 @@ def plot_replication_difference_chart(rows: list[dict]) -> None:
     ax.set_xticklabels([CONDITION_LABELS.get(row["condition"], row["condition"]) for row in rows])
     ax.set_xlabel("Replication condition")
     ax.set_ylabel("Difference (Python mean - NetLogo mean)")
-    ax.set_title("Replication differences across conditions")
     ax.legend()
     ax.grid(axis="y", alpha=0.25)
     fig.tight_layout()
@@ -254,7 +252,6 @@ def plot_replication_metric_comparison(rows: list[dict], metric: str, filename: 
     ax.set_xticklabels(labels)
     ax.set_xlabel("Replication condition")
     ax.set_ylabel(METRIC_LABELS.get(metric, metric))
-    ax.set_title(f"Replication comparison: {METRIC_LABELS.get(metric, metric)}")
     ax.legend()
     ax.grid(axis="y", alpha=0.25)
     fig.text(0.5, 0.01, "Black error bars show +/- 1 standard deviation across simulation runs.", ha="center", fontsize=9)
@@ -349,13 +346,18 @@ def write_extension_horizon_summary_table(all_rows: dict[str, list[dict]]) -> No
     save_table_png(
         table_for_png,
         OUTPUT_DIR / "extension_horizon_summary_table.png",
-        title="Extension horizon summary table",
         column_widths=[0.12, 0.12, 0.18, 0.18, 0.20, 0.20],
         font_size=8,
     )
 
 
-def plot_extension_bar_with_error(rows: list[dict], mean_key: str, sd_key: str, ylabel: str, title: str, filename: str) -> None:
+def plot_extension_bar_with_error(
+    rows: list[dict],
+    mean_key: str,
+    sd_key: str,
+    ylabel: str,
+    filename: str,
+) -> None:
     labels = [row["label"] for row in rows]
     means = [row[mean_key] for row in rows]
     sds = [row[sd_key] for row in rows]
@@ -364,7 +366,6 @@ def plot_extension_bar_with_error(rows: list[dict], mean_key: str, sd_key: str, 
     ax.bar(labels, means, yerr=sds, capsize=4)
     ax.set_xlabel("Immune reinfection probability")
     ax.set_ylabel(ylabel)
-    ax.set_title(title)
     ax.grid(axis="y", alpha=0.25)
     fig.text(0.5, 0.01, "Black error bars show +/- 1 standard deviation across simulation runs.", ha="center", fontsize=9)
     fig.tight_layout(rect=[0, 0.04, 1, 1])
@@ -372,7 +373,12 @@ def plot_extension_bar_with_error(rows: list[dict], mean_key: str, sd_key: str, 
     plt.close(fig)
 
 
-def plot_extension_horizon_lines(all_rows: dict[str, list[dict]], mean_key: str, ylabel: str, title: str, filename: str) -> None:
+def plot_extension_horizon_lines(
+    all_rows: dict[str, list[dict]],
+    mean_key: str,
+    ylabel: str,
+    filename: str,
+) -> None:
     fig, ax = plt.subplots(figsize=(10, 6))
 
     for horizon in ["52 ticks", "156 ticks", "260 ticks"]:
@@ -385,7 +391,6 @@ def plot_extension_horizon_lines(all_rows: dict[str, list[dict]], mean_key: str,
 
     ax.set_xlabel("Immune reinfection probability (%)")
     ax.set_ylabel(ylabel)
-    ax.set_title(title)
     ax.legend()
     ax.grid(axis="y", alpha=0.25)
     fig.tight_layout()
@@ -393,7 +398,12 @@ def plot_extension_horizon_lines(all_rows: dict[str, list[dict]], mean_key: str,
     plt.close(fig)
 
 
-def save_table_png(table: list[list[str]], path: Path, title: str, column_widths: list[float], font_size: int = 8) -> None:
+def save_table_png(
+    table: list[list[str]],
+    path: Path,
+    column_widths: list[float],
+    font_size: int = 8,
+) -> None:
     if not table or len(table) < 2:
         return
 
@@ -401,7 +411,6 @@ def save_table_png(table: list[list[str]], path: Path, title: str, column_widths
     fig_height = max(3.5, 0.35 * n_rows + 1.2)
     fig, ax = plt.subplots(figsize=(13, fig_height))
     ax.axis("off")
-    ax.set_title(title, fontsize=16, fontweight="bold", pad=14)
 
     mpl_table = ax.table(
         cellText=table[1:],
@@ -627,7 +636,7 @@ def build_per_run_dataset(horizon: str, summary_rows: list[dict] | None = None) 
     return dataset
 
 
-def plot_per_run_distribution(dataset: list[dict], key: str, ylabel: str, title: str, filename: str) -> None:
+def plot_per_run_distribution(dataset: list[dict], key: str, ylabel: str, filename: str) -> None:
     grouped: list[list[float]] = []
     labels: list[str] = []
 
@@ -644,7 +653,6 @@ def plot_per_run_distribution(dataset: list[dict], key: str, ylabel: str, title:
     ax.boxplot(grouped, labels=labels, showmeans=True)
     ax.set_xlabel("Immune reinfection probability")
     ax.set_ylabel(ylabel)
-    ax.set_title(title)
     ax.grid(axis="y", alpha=0.25)
     fig.text(0.5, 0.01, "Boxplots show per-run distributions; triangle markers show run means.", ha="center", fontsize=9)
     fig.tight_layout(rect=[0, 0.04, 1, 1])
@@ -668,7 +676,6 @@ def plot_reinfections_vs_burden_scatter(dataset: list[dict]) -> None:
 
     ax.set_xlabel("Immune reinfection events per run")
     ax.set_ylabel("Infection burden (infected-person ticks per run)")
-    ax.set_title("Per-run immune reinfections vs infection burden (260 ticks)")
     ax.legend(title="Immune reinfection probability")
     ax.grid(axis="y", alpha=0.25)
     fig.tight_layout()
@@ -711,7 +718,6 @@ def plot_all_extension() -> None:
         "final_infected_mean",
         "final_infected_sd",
         "Final infected population (%)",
-        f"Final infected population by immune reinfection probability ({horizon})",
         "extension_final_infected_by_probability.png",
     )
     plot_extension_bar_with_error(
@@ -719,7 +725,6 @@ def plot_all_extension() -> None:
         "peak_infected_mean",
         "peak_infected_sd",
         "Peak infected population (%)",
-        f"Peak infected population by immune reinfection probability ({horizon})",
         "extension_peak_infected_by_probability.png",
     )
     plot_extension_bar_with_error(
@@ -727,7 +732,6 @@ def plot_all_extension() -> None:
         "immune_reinfection_mean",
         "immune_reinfection_sd",
         "Immune reinfection events per run",
-        f"Immune reinfections by immune reinfection probability ({horizon})",
         "extension_immune_reinfections_by_probability.png",
     )
     plot_extension_bar_with_error(
@@ -735,7 +739,6 @@ def plot_all_extension() -> None:
         "infection_burden_mean",
         "infection_burden_sd",
         "Infection burden (infected-person ticks per run)",
-        f"Infection burden by immune reinfection probability ({horizon})",
         "extension_infection_burden_by_probability.png",
     )
 
@@ -743,21 +746,18 @@ def plot_all_extension() -> None:
         all_rows,
         "final_infected_mean",
         "Final infected population (%)",
-        "Horizon comparison: final infected population",
         "extension_horizon_final_infected.png",
     )
     plot_extension_horizon_lines(
         all_rows,
         "immune_reinfection_mean",
         "Mean immune reinfection events per run",
-        "Horizon comparison: immune reinfections",
         "extension_horizon_immune_reinfections.png",
     )
     plot_extension_horizon_lines(
         all_rows,
         "infection_burden_mean",
         "Mean infection burden (infected-person ticks per run)",
-        "Horizon comparison: infection burden",
         "extension_horizon_infection_burden.png",
     )
 
@@ -767,14 +767,12 @@ def plot_all_extension() -> None:
             per_run_dataset,
             "infection_burden",
             "Infection burden (infected-person ticks per run)",
-            "Per-run distribution of infection burden (260 ticks)",
             "extension_per_run_infection_burden_distribution.png",
         )
         plot_per_run_distribution(
             per_run_dataset,
             "reinfections",
             "Immune reinfection events per run",
-            "Per-run distribution of immune reinfections (260 ticks)",
             "extension_per_run_reinfections_distribution.png",
         )
         plot_reinfections_vs_burden_scatter(per_run_dataset)
