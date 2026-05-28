@@ -1,127 +1,292 @@
-# src — How to Run
+# How to Run and Configure Experiments
 
-This directory contains the model, experiment scripts, and configs. **Running experiments requires only the Python 3.14+ standard library**; no third-party packages such as matplotlib are needed.
+This directory contains the Python implementation, experiment scripts, and JSON configuration files for running the virus model experiments.
 
-## Before You Run
+The project uses only the Python standard library. No third-party packages such as `matplotlib` are required.
 
-1. Use **Python 3.14 or newer** (`python --version`).
-2. In the terminal, change into the **`src` directory** (where this README lives):
+---
+
+## 1. Requirements
+
+Use Python 3.14 or newer.
+
+Check your Python version with:
 
 ```bash
-cd <path to src>
+python --version
 ```
 
-**You must run** all `python -m run.*` commands below **from the `src` directory** (your working directory is this README’s path).
+---
 
-## Basic Commands
+## 2. Where to Run Commands
 
-**Replication (comparison with NetLogo, 5 conditions):**
+All commands must be run from the **project root**: the directory that contains this README and the `run/`, `configs/`, and `model/` folders.
+
+Change into that directory first:
+
+```bash
+cd /path/to/your/project
+```
+
+Then run commands using the `python -m` module format.
+
+For example:
+```bash
+python -m run.run_extension
+```
+
+Do not run the scripts directly with `python run/run_extension.py`, because the project uses module imports that require `python -m`.
+
+---
+
+## 3. Basic Commands
+
+### Run the replication experiment
+
+The replication experiment compares the Python model with the NetLogo version using 5 experiment conditions.
 
 ```bash
 python -m run.run_prototype
 ```
 
-**Extension (immune reinfection, 6 levels, default 52 ticks):**
+By default, this reads configuration files from:
+
+```text
+configs/prototype/
+```
+
+and writes results to:
+
+```text
+output/python_prototype/
+```
+
+---
+
+### Run the extension experiment
+
+The extension experiment runs the immune reinfection model using 6 reinfection levels.
 
 ```bash
 python -m run.run_extension
 ```
 
-**Extension long horizons (156 / 260 ticks):**
+By default, this reads configuration files from:
+
+```text
+configs/extension/
+```
+
+and writes results to:
+
+```text
+output/python_extension/
+```
+
+---
+
+### Run long-horizon extension experiments
+
+For 156 ticks:
 
 ```bash
 python -m run.run_extension --ticks 156 --output-dir output/python_extension_156ticks
+```
+
+For 260 ticks:
+
+```bash
 python -m run.run_extension --ticks 260 --output-dir output/python_extension_260ticks
 ```
 
-## Run Flow and Output
+When running long-horizon experiments, always specify a separate `--output-dir` so that long-horizon results are not mixed with the default 52-tick results.
 
-### Input
+---
 
-Commands read JSON configs from `configs/` (replication: `configs/prototype/`; extension: `configs/extension/`) and start runs using those parameters. `--runs`, `--ticks`, and `--seed` on the command line **override** the same fields in the JSON; if omitted, values from the config files are used.
+## 4. Command-Line Options
 
-### What Happens When You Run
+Both `run.run_prototype` and `run.run_extension` support the same command-line options:
 
-1. Each condition in the config directory is executed in order (replication: 5 conditions / extension: 6 levels).
-2. Under each condition, `--runs` independent runs are performed; the random seed for run `i` is `base_seed + i` (`i` starts at 0).
-3. Each run advances the model for `--ticks` steps and records population statistics at every tick.
-4. After all runs for a condition finish, results are written to the directory given by `--output-dir` (created automatically if missing).
-5. The terminal prints progress for each condition, e.g. `[00] run 3/100` and the final file path.
+| Option         | Meaning                                  | Example                          |
+| -------------- | ---------------------------------------- | -------------------------------- |
+| `--runs`       | Number of independent runs per condition | `--runs 10`                      |
+| `--ticks`      | Number of ticks per run                  | `--ticks 156`                    |
+| `--seed`       | Base random seed                         | `--seed 42`                      |
+| `--output-dir` | Directory where output files are written | `--output-dir output/test_run`   |
+| `--config-dir` | Directory containing JSON config files   | `--config-dir configs/extension` |
 
-### Default Scale and Random Seed
+The options `--runs`, `--ticks`, and `--seed` override the corresponding values in the JSON config files. `--output-dir` and `--config-dir` choose where results are written and which config directory is loaded; they are not fields in the JSON files.
 
-| Parameter | Default in config files | CLI override |
-|-----------|-------------------------|--------------|
-| `--runs` | **100** (100 independent replicates per condition) | `--runs 10` |
-| `--ticks` | **52** (52 weeks per run) | `--ticks 156` |
-| `--seed` | **`base_seed: 0`** | `--seed 42` |
-
-The actual seed for a single run is `base_seed + run_id` (by default: run 0→0, run 1→1, …, run 99→99). Changing `--seed` shifts the random sequence for all runs, which helps with reproduction or comparison.
-
-### Output Directory
-
-Paths are relative to the **current working directory** (when executing from `src`, relative to `src/`). If `--output-dir` is not set, the default paths in the table below apply. **For long horizons (156 / 260 ticks), specify a directory explicitly** so results are not mixed with the default 52-tick output.
-
-| Command | Default `--output-dir` |
-|---------|------------------------|
-| `run.run_prototype` | `output/python_prototype/` |
-| `run.run_extension` (52 ticks) | `output/python_extension/` |
-| `run.run_extension --ticks 156` | No dedicated default; specify one, e.g. `output/python_extension_156ticks/` |
-| `run.run_extension --ticks 260` | No dedicated default; specify one, e.g. `output/python_extension_260ticks/` |
-
-Examples for specifying output:
+For example:
 
 ```bash
-# Write under output/ inside src
-python -m run.run_extension --output-dir output/python_extension
-
-# Write to output/ at the repo root (use .. when running from src)
-python -m run.run_extension --output-dir <path you want>
+python -m run.run_extension --runs 10 --ticks 52 --seed 42
 ```
 
-### Generated Files
+This runs the extension experiment using:
 
-**Replication** (one CSV per condition):
+* 10 independent runs per condition
+* 52 ticks per run
+* base random seed 42
 
-- `Virus {Condition}_100_runs-spreadsheet.csv` — BehaviorSpace Spreadsheet v2 format (sick / immune / healthy / total per run and tick, etc.)
+---
 
-**Extension** (two CSVs per level):
+## 5. Configuration Files
 
-- `Virus Extension {level}_100_runs-spreadsheet.csv` — same as above, main time series
-- `{level}_run_metrics.csv` — reinfection metrics (immune reinfections per run + cumulative reinfection series per tick)
+Experiment settings are stored as JSON files inside the `configs/` directory.
 
-The `100` in filenames comes from `runs` in the config; if you change `--runs` to another value, export still writes the actual number of runs, but the `output_file` name in the config is not renamed automatically.
+The replication experiment uses:
 
-## Common Parameter Examples
+```text
+configs/prototype/
+```
+
+The extension experiment uses:
+
+```text
+configs/extension/
+```
+
+Each JSON file represents one experiment condition.
+
+For example, the extension config directory contains files such as:
+
+```text
+configs/extension/00.json
+configs/extension/01.json
+configs/extension/02.json
+configs/extension/05.json
+configs/extension/10.json
+configs/extension/25.json
+```
+
+These correspond to different immune reinfection levels.
+
+---
+
+## 6. How Config Values Are Used
+
+When an experiment is run:
+
+1. The script reads all JSON config files from the selected config directory.
+2. Each config file is treated as one condition.
+3. Conditions are executed in order.
+4. For each condition, the model runs multiple independent replicates.
+5. Results are written to the selected output directory.
+
+The main configurable values include:
+
+| Config field     | Meaning                                         |
+| ---------------- | ----------------------------------------------- |
+| `runs`           | Number of independent replicates                |
+| `ticks`          | Number of simulation ticks                      |
+| `base_seed`      | Starting random seed                            |
+| `output_file`    | Name of the main output CSV file                |
+| model parameters | Parameters used to initialise and run the model |
+
+---
+
+## 7. Command-Line Overrides
+
+The following command-line arguments override the same values in the JSON config files:
+
+```text
+--runs
+--ticks
+--seed
+```
+
+For example:
 
 ```bash
-# Quick test: 2 replicates, 5 weeks, fixed seed
-python -m run.run_extension --runs 2 --ticks 5 --seed 0
-
-# Specify output directory
-python -m run.run_extension --output-dir output/python_extension
-
-# Long horizon 156 / 260 ticks (must set both --ticks and --output-dir)
-python -m run.run_extension --ticks 156 --output-dir output/python_extension_156ticks
-python -m run.run_extension --ticks 260 --output-dir output/python_extension_260ticks
+python -m run.run_extension --runs 20 --ticks 156 --seed 100
 ```
 
-Replication supports the same flags: `--runs`, `--ticks`, `--seed`, `--output-dir`, `--config-dir`.
+This overrides the config files and uses:
 
-## Configuration
+```text
+runs = 20
+ticks = 156
+base_seed = 100
+```
 
-Experiment parameter JSON lives in:
+If these command-line options are not provided, the values from the JSON config files are used.
 
-- `configs/prototype/` — replication
-- `configs/extension/` — extension (`00.json` … `25.json`)
+---
 
-Use `--config-dir` to override the default config directory.
+## 8. Random Seeds
 
-## Do Not Run Like This
+The base seed is controlled by the config file or by the `--seed` command-line option.
+
+For each independent run, the actual seed is calculated as:
+
+```text
+actual_seed = base_seed + run_id
+```
+
+where `run_id` starts from 0.
+
+For example, if:
+
+```text
+base_seed = 0
+runs = 100
+```
+
+then the runs use seeds:
+
+```text
+0, 1, 2, ..., 99
+```
+
+If you run:
 
 ```bash
-python run/run_extension.py          # raises No module named 'scripts'
-python -m src/run/run_extension.py # wrong module name
+python -m run.run_extension --seed 42
 ```
 
-Always run from the **`src` directory** with: `python -m run.run_extension`.
+then the runs use seeds:
+
+```text
+42, 43, 44, ...
+```
+
+This makes experiments reproducible while still allowing each replicate to use a different random seed.
+
+---
+
+## 9. Output Files
+
+### Replication experiment
+
+The replication experiment writes one CSV file per condition.
+
+Example output file:
+
+```text
+Virus {Condition}_100_runs-spreadsheet.csv
+```
+
+The file uses a BehaviorSpace-style spreadsheet format and records population statistics for each run and tick.
+
+---
+
+### Extension experiment
+
+The extension experiment writes two CSV files per reinfection level:
+
+```text
+Virus Extension {level}_100_runs-spreadsheet.csv
+{level}_run_metrics.csv
+```
+
+The spreadsheet CSV contains the main time-series results.
+
+The run metrics CSV contains reinfection-related metrics, including:
+
+* immune reinfections per run
+* cumulative reinfections per tick
+
+Output CSV names come from each config file’s `output_file` field (for example, `_100_runs-` in the default names). Changing `--runs` on the command line does not rename those files automatically.
+
+---
